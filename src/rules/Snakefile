@@ -1,0 +1,28 @@
+include: "const.py"
+
+rule intersectInitialDifficultFiles:
+    input: vcf=DATA + 'raw/{subset}.vcf',
+           bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files/SegmentalDuplications/segdupall.bed.gz'
+    output: DATA + 'interim/{subset}/initial_files_intersections/{subset}_SegDupAll.intr'
+    shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
+
+rule all:
+    input: expand(DATA + 'interim/{subset}/initial_files_intersections/{subset}_SegDupAll.intr', subset=('cgi_only_sources','illumina_only_sources','cgi_illumina_sources','illumina_only_sources_test'))
+
+rule intersectFiles:
+    input: vcf=DATA + 'raw/{subset}.vcf',
+           bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/ahmad_exomizer/data/interim/sql_result.status.bed'
+    output: DATA + 'interim/{subset}/{subset}_hgmd.intr'
+    shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
+
+rule intersectFilesAll:
+    input: expand(DATA + 'interim/{subset}/{subset}_hgmd.intr', subset=('cgi_only_sources','illumina_only_sources','cgi_illumina_sources','illumina_only_sources_test','mat'))
+
+rule intersectDifficultByFile:
+    input: vcf=DATA + 'raw/{subset}.vcf',
+	   bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/ahmad_exomeizer/data/interim/difficult/by_file/{subset2}/{subset3}.bed.gz'
+    output: DATA + 'interim/{subset}/{subset}_{subset3}.intr'
+    shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
+
+rule intersectAllDifficultByFile:
+    input: expand(DATA + 'interim/{subset}/{subset}_{subset3}.intr', subset=('cgi_only_sources','illumina_only_sources','illumina_only_sources_test','cgi_illumina_sources','mat'), subset3=('
