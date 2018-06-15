@@ -1,0 +1,8 @@
+include: "const.py"
+
+rule testRule:
+    input: vcf=DATA + 'raw/cgi_only_sources.vcf',
+           bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files/SegmentalDuplications/segdupall.bed.gz'
+    output: DATA + 'interim/cgi_only/initial_files_intersections/cgi_only_SegDupAll.intr'
+    shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
+
