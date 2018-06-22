@@ -1,4 +1,16 @@
-### 2018_06-13
+### 2018_06_18
+* Fixed error in vcf file (blank line above header) run bedtools to annotate Target data
+* Intersect Target data with bed files of good and poor mapping regions and bed files without those regions mapped
+
+### 2018_06_15
+* Continue to work on Target vcf file
+* Work on graphing allele frequencies with ggplot
+
+### 2018_06_14
+* Create vcf file of Target data
+* bedtools not running on vcf file, need to figure out what is causing errors
+
+### 2018_06_13
 * Create Snakemake file for project pipeline
 * Add rules to Snakemake file for bedfile intersections of platform source vcf files to bed files via bedtools
 * Parse Target data and create vcf file
