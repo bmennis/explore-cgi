@@ -1,3 +1,8 @@
+###2018_06_22
+* Used vcf sort allele script to pull source information for allele frequencies and allele frequencies of each read from each source vcf file.
+* Used allele plot R script to plot allele sources vs frequencies for cgi only, cgi and illumina, and illumina only.
+* Updated Snakemake file to include allele sorting, allele plotting, along with variant source sorting.
+
 ### 2018_06_18
 * Fixed error in vcf file (blank line above header) run bedtools to annotate Target data
 * Intersect Target data with bed files of good and poor mapping regions and bed files without those regions mapped
