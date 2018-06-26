@@ -1,3 +1,4 @@
+"""Write kaviar variants to only cgi, only illumina, and both"""
 import csv
 import sys
 
@@ -10,11 +11,11 @@ def writeInfo(dataSource):
 
 
 #Establish files to write variants to after classification/sorting
-infile = sys.argv[1]
-gsOutfile = 'good_sources.vcf'
-cgiOutfile = 'cgi_only_sources.vcf'
-illuminaOutfile = 'illumina_only_sources.vcf'
-cgiIlluminaOutfile = 'cgi_illumina_sources.vcf'
+infile, outdir = sys.argv[1], sys.argv[2]
+gsOutfile = outdir + 'good_sources.vcf'
+cgiOutfile = outdir + 'cgi_only_sources.vcf'
+illuminaOutfile = outdir + 'illumina_only_sources.vcf'
+cgiIlluminaOutfile = outdir + 'cgi_illumina_sources.vcf'
 
 
 with open(infile, 'r') as fh:  #open the vcf file in read mode specified
