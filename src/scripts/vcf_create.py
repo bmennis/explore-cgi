@@ -7,9 +7,7 @@ def write_output(new_line, output_file):
     with open(output_file, 'a') as ofh:
         ofh.write(new_line)
 
-hdr = """
-##fileformat=VCFv4.1
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n"""
+hdr = """##fileformat=VCFv4.1\n#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n"""
 
 input_file = sys.argv[1]
 output_file = sys.argv[2]
