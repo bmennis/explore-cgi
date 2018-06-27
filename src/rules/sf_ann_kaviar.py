@@ -7,8 +7,13 @@ rule unzip_kaviar:
 
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'
-    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources'))
+    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources_unfiltered', 'cgi_illumina_sources'))
     shell:  'python {SCRIPTS}vcf_sort.py {input} {DATA}interim/kaviar_subsets/'
+
+rule filterIlluminaOnlySources:
+    input: DATA + 'interim/kaviar_subsets/illumina_only_sources_unfiltered.vcf'
+    output: DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
+    shell: '''awk -F'\\t' -vOFS='\\t' '{ if ($5 ~ /^<.*/) $5="."}1' {input} > {output}'''
 
 rule intersectInitialDifficultFiles:
     input:  vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',
