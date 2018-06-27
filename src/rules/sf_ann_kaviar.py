@@ -7,18 +7,18 @@ rule unzip_kaviar:
 
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'
-    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources_unfiltered', 'cgi_illumina_sources'))
+    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources'))
     shell:  'python {SCRIPTS}vcf_sort.py {input} {DATA}interim/kaviar_subsets/'
 
 rule filterIlluminaOnlySources:
-    input: DATA + 'interim/kaviar_subsets/illumina_only_sources_unfiltered.vcf'
+    input: DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
     output: DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
-    shell: '''awk -F'\\t' -vOFS='\\t' '{ if ($5 ~ /^<.*/) $5="."}1' {input} > {output}'''
+    shell: '''awk -F'\\t' -vOFS='\\t' '{ if ($5 ~ /^<.*/) $5="."}1' {input} > tmp && mv tmp {output}'''
 
 rule intersectInitialDifficultFiles:
     input:  vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',
             bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files/{subset2}/{subset3}.bed.gz'
-    output: DATA + 'interim/{subset}/initial_files_intersections/{subset}_{subset3}.intr'
+    output: DATA + 'interim/kaviar_subsets/{subset}/initial_files_intersections/{subset}_{subset3}.intr'
     shell:  'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
 # rule all:
@@ -27,11 +27,11 @@ rule intersectInitialDifficultFiles:
 rule intersectFiles:
     input: vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',
            bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/ahmad_exomeizer/data/interim/sql_result.status.bed'
-    output: DATA + 'interim/{subset}/{subset}_hgmd.intr'
+    output: DATA + 'interim/kaviar_subsets/{subset}/{subset}_hgmd.intr'
     shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
 rule intersectFilesAll:
-    input: expand(DATA + 'interim/{subset}/{subset}_hgmd.intr', subset=('cgi_only_sources','illumina_only_sources','cgi_illumina_sources'))
+    input: expand(DATA + 'interim/{subset}/{subset}_hgmd.intr', subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'))
 
 # rule intersectDifficultByFile:
 #     input: vcf=DATA + 'raw/{subset}.vcf',
