@@ -1,4 +1,9 @@
-###2018_06_22
+### 2018_06_26
+* Added Target filtering and sorting rules to sf_ann_target.py to filter illumina matches and mismatches as well as sort them to different files.
+* Work on updating Kaviar annotation pipeline to include filtering illumina data source variant notation.  This notation causes issues with bedtools intersections and working on recreating the command to accurately and efficiently find and replace that notation.
+
+
+### 2018_06_22
 * Used vcf sort allele script to pull source information for allele frequencies and allele frequencies of each read from each source vcf file.
 * Used allele plot R script to plot allele sources vs frequencies for cgi only, cgi and illumina, and illumina only.
 * Updated Snakemake file to include allele sorting, allele plotting, along with variant source sorting.
