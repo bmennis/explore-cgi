@@ -21,13 +21,21 @@ rule sortTargetNotIllumina:
 
 rule sortTargetIllumina:
     input: DATA + 'raw/mat_sorted'
-    ouput: DATA + 'raw/mat_illumina_match'
-    shell: '''awk -F '\\t' '($5!="0") || ($6!="0") || ($7!="0") || ($8!="0") || ($9!="0") || ($10!="0") || ($11!="0") {{print $0}}' data/raw/mat_sorted > data/raw/mat_illumina_match'''
+    output: DATA + 'raw/mat_illumina_match'
+    shell: '''awk -F '\\t' '($5!="0") || ($6!="0") || ($7!="0") || ($8!="0") || ($9!="0") || ($10!="0") || ($11!="0") {{print $0}}' {input} > {output}'''
+
+rule prepTargetMatchMismatchFiles:
+    input: DATA + 'raw/{subset}'
+    output: DATA + 'raw/{subset}_vcf_prep'
+    shell:  'cut -f 1,2,3,4 {input} > {output}'
+
+rule prepAllTargetMatchMismatch:
+    input: expand(DATA + 'raw/{subset}_vcf_prep', subset=('mat_not_illumina','mat_illumina_match'))
 
 rule createTargetMatchMismatchVcfFile:
-    input: DATA + 'raw/{subset}'
+    input: DATA + 'raw/{subset}_vcf_prep'
     output: DATA + 'interim/target_subsets/{subset}/{subset}.vcf'
-    shell: '''cut -f 1,2,3,4 | python src/scripts/vcf_create.py {input} {output}'''
+    shell: 'python src/scripts/vcf_create.py {input} {output}'
 
 rule createAllMatchMismatchVcfFiles:
     input: expand(DATA + 'interim/target_subsets/{subset}/{subset}.vcf', subset=('mat_not_illumina','mat_illumina_match')) 
@@ -48,7 +56,7 @@ rule intersectDifficultByFile:
     shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
 rule intersectAllDifficultByFile:
-    input: expand(DATA + 'interim/target_subsets/{subset}/{subset}_{subset3}.intr', \
+    input: expand(DATA + 'interim/target_subsets/{subset}/{subset2}_{subset3}.intr', \
                   subset=('mat_not_illumina','mat_illumina_match','mat'),
                   subset2=('FunctionalTechnicallyDifficultRegions','GCcontent','LowComplexity','mappability','SegmentalDuplications'),
                   subset3=('BadPromoters_gb-2013-14-5-r51-s1.sql_result.status.difficult','human_g1k_v37_l100_gclt25orgt65_slop50.sql_result.status.difficult','AllRepeats_gt95percidentity_slop5.sql_result.status.difficult','lowmappabilityall.sql_result.status.difficult','segdupall.sql_result.status.difficult'))
