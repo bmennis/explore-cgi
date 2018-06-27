@@ -12,8 +12,8 @@ rule split_kaviar:
 
 rule filterIlluminaOnlySources:
     input: DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
-    output: DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
-    shell: '''awk -F'\\t' -vOFS='\\t' '{ if ($5 ~ /^<.*/) $5="."}1' {input} > tmp && mv tmp {output}'''
+    output: DATA + 'interim/kaviar_subsets/illumina_only_sources_filtered.vcf'
+    shell: '''awk -F'\\t' -vOFS='\\t' '{ if ($5 ~ /^<.*/) $5="."}1' {input} > {output}'''
 
 rule intersectInitialDifficultFiles:
     input:  vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',
@@ -21,8 +21,8 @@ rule intersectInitialDifficultFiles:
     output: DATA + 'interim/kaviar_subsets/{subset}/initial_files_intersections/{subset}_{subset3}.intr'
     shell:  'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
-# rule all:
-#     input: expand(DATA + 'interim/{subset}/initial_files_intersections/{subset}_{subset3}.intr', subset=('cgi_only_sources','illumina_only_sources','cgi_illumina_sources','illumina_only_sources_test','mat'), subset2=('mappability','SegmentalDuplications'), subset3=('lowmappabilityall','segdupall'))
+#rule all:
+#    input: expand(DATA + 'interim/kaviar_subsets/{subset}/initial_files_intersections/{subset}_{subset3}.intr', subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'), subset2=('mappability','SegmentalDuplications'), subset3=('lowmappabilityall','segdupall'))
 
 rule intersectFiles:
     input: vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',
@@ -31,7 +31,7 @@ rule intersectFiles:
     shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
 rule intersectFilesAll:
-    input: expand(DATA + 'interim/{subset}/{subset}_hgmd.intr', subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'))
+    input: expand(DATA + 'interim/kaviar_subsets/{subset}/{subset}_hgmd.intr', subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'))
 
 # rule intersectDifficultByFile:
 #     input: vcf=DATA + 'raw/{subset}.vcf',
@@ -41,12 +41,12 @@ rule intersectFilesAll:
 
 # rule intersectAllDifficultByFile:
 #     input: expand(DATA + 'interim/{subset}/{subset}_{subset3}.intr', \
-#                   subset=('cgi_only_sources','illumina_only_sources','illumina_only_sources_test','cgi_illumina_sources','mat'),
+#                   subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'),
 #                   subset2=('FunctionalTechnicallyDifficultRegions','GCcontent','LowComplexity','mappability','SegmentalDuplications'),
 #                   subset3=('BadPromoters_gb-2013-14-5-r51-s1.sql_result.status.difficult','human_g1k_v37_l100_gclt25orgt65_slop50.sql_result.status.difficult','AllRepeats_gt95percidentity_slop5.sql_result.status.difficult','lowmappabilityall.sql_result.status.difficult','segdupall.sql_result.status.difficult'))
 
 rule sortAlleleFrequency:
-    input:  expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources','cgi_illumina_sources','illumina_only_sources'))
+    input:  expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources','cgi_illumina_sources','illumina_only_sources_filtered'))
     output: DATA + 'interim/Kaviar_subset_allele_frq.csv'
     run:
         for afile in input:
