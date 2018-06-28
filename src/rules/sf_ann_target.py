@@ -7,7 +7,7 @@ rule removeTargetDuplicates:
 rule createTargetVcfFile:
     input: DATA + 'raw/mat_raw_list'
     output: DATA + 'interim/target_subsets/mat/mat.vcf'
-    shell: 'python src/scripts/vcf_create.py {input} {output}'
+    shell: 'python ../scripts/vcf_create.py {input} {output}'
 
 rule filterTargetWithMatch:
     input: '/mnt/isilon/cbmi/variome/perry/projects/diskin/nb_convergence/data/features/mat'
@@ -35,40 +35,38 @@ rule prepAllTargetMatchMismatch:
 rule createTargetMatchMismatchVcfFile:
     input: DATA + 'raw/{subset}_vcf_prep'
     output: DATA + 'interim/target_subsets/{subset}/{subset}.vcf'
-    shell: 'python src/scripts/vcf_create.py {input} {output}'
+    shell: 'python ../scripts/vcf_create.py {input} {output}'
 
 rule createAllMatchMismatchVcfFiles:
     input: expand(DATA + 'interim/target_subsets/{subset}/{subset}.vcf', subset=('mat_not_illumina','mat_illumina_match')) 
 
-rule intersectFiles:
+rule intersectTargetFiles:
     input: vcf=DATA + 'interim/target_subsets/{subset}/{subset}.vcf',
            bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/ahmad_exomeizer/data/interim/sql_result.status.bed'
-    output: DATA + 'interim/target_subsets/{subset}/{subset}_hgmd.intr'
+    output: DATA + 'interim/target_subsets/{subset}/{subset}_sql_result.status.intr'
     shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
-rule intersectFilesAll:
-    input: expand(DATA + 'interim/target_subsets/{subset}/{subset}_hgmd.intr', subset=('mat_not_illumina','mat_illumina_match','mat'))
+rule intersectTargetFilesAll:
+    input: expand(DATA + 'interim/target_subsets/{subset}/{subset}_sql_result.status.intr', subset=('mat_not_illumina','mat_illumina_match','mat'))
 
-rule intersectDifficultByFile:
+rule intersectTargetDifficultByFile:
     input: vcf=DATA + 'interim/target_subsets/{subset}/{subset}.vcf',
-         bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/ahmad_exomeizer/data/interim/difficult/by_file/{subset2}/{subset3}.bed'
-    output: DATA + 'interim/target_subsets/{subset}/{subset2}_{subset3}.intr'
+           bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/ahmad_exomeizer/data/interim/difficult/by_file/{subset2}/{subset3}.bed'
+    output: DATA + 'interim/target_subsets/{subset}/{subset}_{subset2}__{subset3}.intr'
     shell: 'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
-rule intersectAllDifficultByFile:
-    input: expand(DATA + 'interim/target_subsets/{subset}/{subset2}_{subset3}.intr', \
-                  subset=('mat_not_illumina','mat_illumina_match','mat'),
-                  subset2=('FunctionalTechnicallyDifficultRegions','GCcontent','LowComplexity','mappability','SegmentalDuplications'),
-                  subset3=('BadPromoters_gb-2013-14-5-r51-s1.sql_result.status.difficult','human_g1k_v37_l100_gclt25orgt65_slop50.sql_result.status.difficult','AllRepeats_gt95percidentity_slop5.sql_result.status.difficult','lowmappabilityall.sql_result.status.difficult','segdupall.sql_result.status.difficult'))
+rule intersectAllTargetDifficultByFile:
+    input: expand(DATA + 'interim/target_subsets/{subset}/{subset}_{subset4}.intr', \
+                  subset=('mat_not_illumina','mat_illumina_match','mat'), \
+                  subset4=('FunctionalTechnicallyDifficultRegions__BadPromoters_gb-2013-14-5-r51-s1.sql_result.status.difficult','GCcontent__human_g1k_v37_l100_gclt25orgt65_slop50.sql_result.status.difficult','LowComplexity__AllRepeats_gt95percidentity_slop5.sql_result.status.difficult','mappability__lowmappabilityall.sql_result.status.difficult','SegmentalDuplications__segdupall.sql_result.status.difficult'))
 
-rule intersectInitialDifficultFiles:
+rule intersectTargetInitialDifficultFiles:
     input:  vcf=DATA + 'interim/target_subsets/{subset}/{subset}.vcf',
             bed='/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files/{subset2}/{subset3}.bed.gz'
-    output: DATA + 'interim/target_subsets/{subset}/initial_files_intersections/{subset}_{subset3}.intr'
+    output: DATA + 'interim/target_subsets/{subset}/initial_files_intersections/{subset}_{subset2}__{subset3}.intr'
     shell:  'bedtools intersect -wb -a {input.vcf} -b {input.bed} > {output}'
 
-rule all:
-    input: expand(DATA + 'interim/target_subsets/{subset}/initial_files_intersections/{subset}_{subset3}.intr', \
-                  subset=('mat_not_illumina','mat_illumina_match','mat'), 
-                  subset2=('mappability','SegmentalDuplications'), 
-                  subset3=('lowmappabilityall','segdupall'))
+rule intersectAllTargetInitialDifficultFiles:
+    input: expand(DATA + 'interim/target_subsets/{subset}/initial_files_intersections/{subset}_{subset4}.intr', \
+                  subset=('mat_not_illumina','mat_illumina_match','mat'), \
+                  subset4=('mappability__lowmappabilityall','SegmentalDuplications__segdupall'))
