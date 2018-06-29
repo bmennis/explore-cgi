@@ -1,3 +1,15 @@
+### 2018_06_29
+* Finish running intersection rules from snakemake files for kaviar files
+* Run sortAlleleFrequency rule on Kaviar data to generate allele frequency file
+* Next need to plot allele frequencies when finished
+* Also need counts of variants in subsets
+
+### 2018_06_28
+*  Worked on snakemake files for kaviar and target annotation
+*  Updated intersection rules to properly recognize directories and files and add those names to the outputs of the intersections
+*  Tested the snakemake files and rules and fix errors
+*  Run rules from snakemake files to process correct subsets of kaviar files
+
 ### 2018_06_26
 * Added Target filtering and sorting rules to sf_ann_target.py to filter illumina matches and mismatches as well as sort them to different files.
 * Work on updating Kaviar annotation pipeline to include filtering illumina data source variant notation.  This notation causes issues with bedtools intersections and working on recreating the command to accurately and efficiently find and replace that notation.
