@@ -70,3 +70,14 @@ rule intersectAllTargetInitialDifficultFiles:
     input: expand(DATA + 'interim/target_subsets/{subset}/initial_files_intersections/{subset}_{subset4}.intr', \
                   subset=('mat_not_illumina','mat_illumina_match','mat'), \
                   subset4=('mappability__lowmappabilityall','SegmentalDuplications__segdupall'))
+
+rule getTargetLineCounts:
+    input: DATA + 'interim/target_subsets/'
+    output: DATA + 'interim/file_line_counts_target'
+    shell: '''wc -l `find {input} -type f` > {output}'''
+
+rule sortTargetLineCounts:
+    input: DATA + 'interim/file_line_counts_target'
+    output: DATA + 'interim/file_line_counts_target_sorted.csv'
+    shell: 'python {SCRIPTS}line_count_sort_target.py {input} {output}'
+
