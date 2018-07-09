@@ -1,3 +1,10 @@
+### 2018_07_09
+* Finish script to sort line counts of kaviar subsets
+* Modify kaviar line count script to apply to target data
+* Create rules in respective snake files to get line counts from kaviar and target files created in pipeline
+* Create rules to sort line counts for kaviar and target data and put into csv files
+* Pull lines from kaviar.vcf without data source which appear to be the lines missing from subset files.
+
 ### 2018_06_29
 * Finish running intersection rules from snakemake files for kaviar files
 * Run sortAlleleFrequency rule on Kaviar data to generate allele frequency file
