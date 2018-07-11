@@ -1,3 +1,6 @@
+### 2018_07_11
+* Kaviar has updated the sources so variants that had no source now have illumina or cgi sources. Will ignore for now. Ex chr1:877827
+
 ### 2018_07_09
 * Finish script to sort line counts of kaviar subsets
 * Modify kaviar line count script to apply to target data
