@@ -1,3 +1,36 @@
+### 2018_07_11
+* Kaviar has updated the sources so variants that had no source now have illumina or cgi sources. Will ignore for now. Ex chr1:877827
+* [DL examples](https://github.com/hussius/deeplearning-biology#genomics_variant-calling)
+
+### 2018_07_09
+* Finish script to sort line counts of kaviar subsets
+* Modify kaviar line count script to apply to target data
+* Create rules in respective snake files to get line counts from kaviar and target files created in pipeline
+* Create rules to sort line counts for kaviar and target data and put into csv files
+* Pull lines from kaviar.vcf without data source which appear to be the lines missing from subset files.
+
+### 2018_06_29
+* Finish running intersection rules from snakemake files for kaviar files
+* Run sortAlleleFrequency rule on Kaviar data to generate allele frequency file
+* Next need to plot allele frequencies when finished
+* Also need counts of variants in subsets
+
+### 2018_06_28
+*  Worked on snakemake files for kaviar and target annotation
+*  Updated intersection rules to properly recognize directories and files and add those names to the outputs of the intersections
+*  Tested the snakemake files and rules and fix errors
+*  Run rules from snakemake files to process correct subsets of kaviar files
+
+### 2018_06_26
+* Added Target filtering and sorting rules to sf_ann_target.py to filter illumina matches and mismatches as well as sort them to different files.
+* Work on updating Kaviar annotation pipeline to include filtering illumina data source variant notation.  This notation causes issues with bedtools intersections and working on recreating the command to accurately and efficiently find and replace that notation.
+
+
+### 2018_06_22
+* Used vcf sort allele script to pull source information for allele frequencies and allele frequencies of each read from each source vcf file.
+* Used allele plot R script to plot allele sources vs frequencies for cgi only, cgi and illumina, and illumina only.
+* Updated Snakemake file to include allele sorting, allele plotting, along with variant source sorting.
+
 ### 2018_06_18
 * Fixed error in vcf file (blank line above header) run bedtools to annotate Target data
 * Intersect Target data with bed files of good and poor mapping regions and bed files without those regions mapped
