@@ -1,5 +1,6 @@
 ### 2018_07_11
 * Kaviar has updated the sources so variants that had no source now have illumina or cgi sources. Will ignore for now. Ex chr1:877827
+* [DL examples](https://github.com/hussius/deeplearning-biology#genomics_variant-calling)
 
 ### 2018_07_09
 * Finish script to sort line counts of kaviar subsets
