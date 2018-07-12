@@ -22,10 +22,15 @@ rule prep_segmental_duplications:
     ouput: GEMINI_DIR + '{bed,hg19_self_chain_split.sort|segdupall|notinsegdupall|hg19_self_chain_split_both}.bed.gz'
     shell: 'cp {input} {output}'
 
-#Working on this rule
-#rule prep_gc_content:
-#    input: REGION_DIR + 'GCcontent/{bed}.bed.gz'
-#    output: GEMINI_DIR + '{bed,
+rule prep_gc_content:
+    input: REGION_DIR + 'GCcontent/{bed}.bed.gz'
+    output: GEMINI_DIR + '{bed,human_g1k_v37_l100_gclt30orgt55_slop50|human_g1k_v37_l100_gc30to55_slop50}.bed.gz'
+    shell: 'cp {input} {output}'
+
+rule prep_low_complexity:
+    input: REGION_DIR + 'LowComplexity/{bed}.bed.gz'
+    output: GEMINI_DIR + '{bed,AllRepeats_gt95percidentity_slop5|notinAllRepeats_gt95percidentity_slop5|AllRepeats_lt51bp_gt95identity_merged}.bed.gz'
+    shell: 'cp {input} {output}'
 
 rule tabix_regions:
     """Index any bed file"""
@@ -33,7 +38,7 @@ rule tabix_regions:
     output: GEMINI_DIR + '{bedfile}.bed.gz.tbi'
     shell:  'tabix -p bed {input}'
 
-ANNO_BEDS = ('lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegions_dist1', 'refseq_union_cds.sort', 'notinrefseq_union_cds.sort', 'BadPromoters_gb-2013-14-5-r51-s1')
+ANNO_BEDS = ('lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegions_dist1', 'refseq_union_cds.sort', 'notinrefseq_union_cds.sort', 'BadPromoters_gb-2013-14-5-r51-s1', 'human_g1k_v37_l100_gclt30orgt55_slop50', 'human_g1k_v37_l100_gc30to55_slop50','hg19_self_chain_split.sort', 'segdupall', 'notinsegdupall', 'hg19_self_chain_split_both','notinAllRepeats_gt95percidentity_slop5', 'AllRepeats_gt95percidentity_slop5', 'AllRepeats_lt51bp_gt95identity_merged')
 rule all_vcfanno_files:
     input:  expand(GEMINI_DIR + '{bedfile}.bed.gz.tbi', bedfile=ANNO_BEDS)
     output: o = CONFIG + 'kaviar_vcfanno.conf'
