@@ -1,5 +1,7 @@
 """Make matrix from vcf file"""
-import argparse
+import argparse, sys
+sys.path.append('../rules/')
+import const
 
 def get_kaviar_status(line):
     row = line.strip().split('\t')
@@ -16,7 +18,7 @@ def get_kaviar_status(line):
             return 'ill'
     return 'none'
 
-ANNO_BEDS = ['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegions_dist1']
+ANNO_BEDS = const.ANNO_BEDS #['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegions_dist1']
 def mk_flags(info_ls):
     flags = []
     for flag in ANNO_BEDS:

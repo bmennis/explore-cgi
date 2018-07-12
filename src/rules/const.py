@@ -15,3 +15,6 @@ CONFIG = PWD + 'configs/'
 
 REGION_DIR = '/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files/'
 GEMINI_DIR = '/mnt/isilon/cbmi/variome/bin/gemini/data/gemini_data/'
+
+ANNO_BEDS = ['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegions_dist1', 'segdupall', 'notinsegdupall',
+             'notinrefseq_union_cds.sort', 'BadPromoters_gb-2013-14-5-r51-s1']

@@ -4,3 +4,4 @@ data/
 src/rules/.snakemake
 *.#*
 src/scripts/nimcache
+__pycache__/
