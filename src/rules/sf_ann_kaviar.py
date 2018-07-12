@@ -30,7 +30,7 @@ rule mk_short_kaviar:
             for line in f:
                 print(line.strip(), file=fout)
                 i += 1
-                if i == 3000:
+                if i == 100000:
                     break
 
 rule kaviar_vcfanno:

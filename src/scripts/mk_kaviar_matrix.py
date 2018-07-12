@@ -30,14 +30,23 @@ def mk_line_info(line):
     sp = line.strip().split('\t')
     return sp[0:2] + sp[3:5] + mk_flags(sp[7].split(';'))
 
+def mk_var_type(line):
+    ref, alt = line.split('\t')[3:5]
+    if len(ref) == 1 and len(alt) == 1:
+        return 'snv'
+    if len(ref) == len(alt) and ref != '.' and alt != '.':
+        return 'subs'
+    return 'indel'
+
 def main(args):
     with open(args.vcfFile) as f, open(args.outFile, 'w') as fout:
-        header = ['kaviar_status', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS
+        header = ['kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS
         print('\t'.join(header), file=fout)
         for line in f:
             if line[0] != '#':
                 kaviar_status = get_kaviar_status(line)
-                ls = [kaviar_status] + mk_line_info(line)
+                var_type = mk_var_type(line)
+                ls = [kaviar_status, var_type] + mk_line_info(line)
                 print('\t'.join(ls), file=fout)
 
 if __name__ == "__main__":
