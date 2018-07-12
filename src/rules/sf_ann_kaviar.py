@@ -5,15 +5,69 @@ rule unzip_kaviar:
     output: DATA + 'interim/kaviar.vcf'
     shell:  'gunzip -c {input} > {output}'
 
+rule split_kaviar_chrom:
+    input:  i = DATA + 'interim/kaviar.vcf'
+    output: expand(DATA + 'interim/kaviar/{chrom}.full.vcf', chrom=list(range(1,23)) + ['X', 'Y', 'M'])
+    run:
+        outs = {}
+        for chrom in list(range(1,23)) + ['X', 'Y', 'M']:
+            outs[str(chrom)] = open(DATA + 'interim/kaviar/' + str(chrom) + '.full.vcf', 'w')
+        with open(input.i) as f:
+            for line in f:
+                if line[0] == '#':
+                    for chrom in outs:
+                        print(line.strip(), file=outs[chrom])
+                else:
+                    chrom = line.split('\t')[0]
+                    print(line.strip(), file=outs[chrom])
+
+rule mk_short_kaviar:
+    input:  i = DATA + 'interim/kaviar/{chr}.full.vcf'
+    output: o = DATA + 'interim/kaviar/{chr}.short.vcf'
+    run:
+        with open(input.i) as f, open(output.o, 'w') as fout:
+            i = 0
+            for line in f:
+                print(line.strip(), file=fout)
+                i += 1
+                if i == 3000:
+                    break
+
+rule kaviar_vcfanno:
+    input:   vcf = DATA + 'interim/kaviar/{chr}.{set}.vcf',
+             config = CONFIG + 'kaviar_vcfanno.conf'
+    output:  DATA + 'interim/kaviar_anno/{chr}.{set}.vcf'
+    threads: 3
+    shell:   'vcfanno -p {threads} -base-path {GEMINI_DIR} {input.config} {input.vcf} > {output}'
+
+rule parse_kaviar_anno:
+    input:  DATA + 'interim/kaviar_anno/{chr}.{set}.vcf'
+    output: DATA + 'interim/kaviar_anno_parsed/{chr}.{set}.mat'
+    shell:  'python {SCRIPTS}mk_kaviar_matrix.py {input} {output}'
+
+rule mk_short_kaviars:
+    input:  expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y', 'M'])
+    output: o = DATA + 'interim/kaviar.mat'
+    run:
+        with open(list(input)[0]) as f:
+            header = f.readline().strip()
+        with open(output.o, 'w') as fout:
+            print(header, file=fout)
+            for i in input:
+                with open(i) as f:
+                    f.readline()
+                    for line in f:
+                        print(line.strip(), file=fout)
+
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'
     output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources','no_sources'))
     shell:  'python {SCRIPTS}vcf_sort.py {input} {DATA}interim/kaviar_subsets/'
 
 rule filterIlluminaOnlySources:
-    input: DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
+    input:  DATA + 'interim/kaviar_subsets/illumina_only_sources.vcf'
     output: DATA + 'interim/kaviar_subsets/illumina_only_sources_filtered.vcf'
-    shell: '''awk -F'\\t' -vOFS='\\t' '{{ if ($5 ~ /^<.*/) $5="."}}1' {input} > {output}'''
+    shell:  '''awk -F'\\t' -vOFS='\\t' '{{ if ($5 ~ /^<.*/) $5="."}}1' {input} > {output}'''
 
 rule intersectInitialDifficultFiles:
     input:  vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',

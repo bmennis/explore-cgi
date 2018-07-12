@@ -12,3 +12,6 @@ SCRIPTS = PWD + 'src/scripts/'
 DATA = PWD + 'data/'
 LOG = PWD + 'log/'
 CONFIG = PWD + 'configs/'
+
+REGION_DIR = '/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files/'
+GEMINI_DIR = '/mnt/isilon/cbmi/variome/bin/gemini/data/gemini_data/'
