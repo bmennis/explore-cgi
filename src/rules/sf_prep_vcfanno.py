@@ -32,6 +32,11 @@ rule prep_low_complexity:
     output: GEMINI_DIR + '{bed,AllRepeats_gt95percidentity_slop5|notinAllRepeats_gt95percidentity_slop5|AllRepeats_lt51bp_gt95identity_merged}.bed.gz'
     shell: 'cp {input} {output}'
 
+rule prep_exomizer:
+    input:  '/home/evansj/me/projects/sarmadi/ahmad_exomeizer/data/interim/sql_result.status.bed'
+    output: GEMINI_DIR + 'ahmad_exomizer.bed.gz'
+    shell:  'cut -f 1-3,18,19 {input} | bgzip > {output}'
+
 rule tabix_regions:
     """Index any bed file"""
     input:  GEMINI_DIR + '{bedfile}.bed.gz'
@@ -39,11 +44,19 @@ rule tabix_regions:
     shell:  'tabix -p bed {input}'
 
 rule all_vcfanno_files:
-    input:  expand(GEMINI_DIR + '{bedfile}.bed.gz.tbi', bedfile=ANNO_BEDS)
+    input: GEMINI_DIR + 'ahmad_exomizer.bed.gz.tbi',
+           files=expand(GEMINI_DIR + '{bedfile}.bed.gz.tbi', bedfile=ANNO_BEDS),
     output: o = CONFIG + 'kaviar_vcfanno.conf'
     run:
         with open(output.o, 'w') as fout:
-            for afile in input:
+            anno_entry = """[[annotation]]
+file="ahmad_exomizer.bed.gz"
+names=["ahmad_region","ahmad_region_mq"]
+columns=[4,5]
+ops=["self","self"]
+"""
+            print(anno_entry, file=fout)
+            for afile in input.files:
                 file_name = afile.split('/')[-1].strip('.tbi')
                 name = file_name.split('.bed')[0]
                 anno_entry = """[[annotation]]
