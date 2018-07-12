@@ -17,4 +17,7 @@ REGION_DIR = '/mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools
 GEMINI_DIR = '/mnt/isilon/cbmi/variome/bin/gemini/data/gemini_data/'
 
 ANNO_BEDS = ['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegions_dist1', 'segdupall', 'notinsegdupall',
-             'notinrefseq_union_cds.sort', 'BadPromoters_gb-2013-14-5-r51-s1']
+             'notinrefseq_union_cds.sort', 'BadPromoters_gb-2013-14-5-r51-s1',
+             'human_g1k_v37_l100_gclt30orgt55_slop50', 'human_g1k_v37_l100_gc30to55_slop50','hg19_self_chain_split.sort',
+             'hg19_self_chain_split_both', 'notinAllRepeats_gt95percidentity_slop5',
+             'AllRepeats_gt95percidentity_slop5', 'AllRepeats_lt51bp_gt95identity_merged']
