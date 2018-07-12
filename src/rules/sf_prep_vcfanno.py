@@ -2,10 +2,10 @@
 /mnt/isilon/cbmi/variome/perry/projects/sarmadi/benchmarking-tools/resources/stratification-bed-files
 """
 
-rule low_mappability:
-    input: REGION_DIR + 'mappability/{bed}.bed.gz'
+rule prep_low_mappability:
+    input:  REGION_DIR + 'mappability/{bed}.bed.gz'
     output: GEMINI_DIR + '{bed,lowmappabilityall|notinlowmappabilityall|siren_similarRegions_dist1}.bed.gz'
-    shell: 'cp {input} {output}'
+    shell:  'cp {input} {output}'
 
 rule tabix_regions:
     """Index any bed file"""
