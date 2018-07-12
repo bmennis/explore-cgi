@@ -3,21 +3,14 @@ import csv
 import sys
 import os
 
-def checkHeader(outfile):
+def checkOutfile(outfile):
 	"""A function to check if the header is present in outfile and if missing, call the write header function."""
 
-	with open(outfile, 'r') as ofh:
-        	header = ofh.readline()
-        	if header == '':
-                	ofh.close()
-                	writeHeader(outfile)
+	if os.path.exists(outfile):
+		pass
 
-        	else:
-                	if header[0] == 'S':
-                        	ofh.close()
-                	else:
-                        	ofh.close()
-                        	writeHeader(outfile)
+	else:
+		writeHeader(outfile)	
 
 def writeInfo(outfile, source, alleleFrq):
 	"""A function to write information to a vcf file."""
@@ -61,7 +54,7 @@ infile = sys.argv[1]
 outfile = sys.argv[2]
 
 source = getSource(infile)
-checkHeader(outfile)
+checkOutfile(outfile)
 
 if str(sys.argv[1]).endswith(".gz") or str(sys.argv[1]).endswith(".gzip"):
 	with gzip.open(infile, 'rt') as gfh:
