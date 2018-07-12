@@ -7,7 +7,7 @@ rule unzip_kaviar:
 
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'
-    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources'))
+    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources','no_sources'))
     shell:  'python {SCRIPTS}vcf_sort.py {input} {DATA}interim/kaviar_subsets/'
 
 rule filterIlluminaOnlySources:
@@ -23,7 +23,7 @@ rule intersectInitialDifficultFiles:
 
 rule all:
     input: expand(DATA + 'interim/kaviar_subsets/{subset}/initial_files_intersections/{subset}_{subset4}.intr', \
-                  subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'), \
+                  subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources','no_sources'), \
                   subset4=('mappability__lowmappabilityall','SegmentalDuplications__segdupall'))
 
 rule intersectFiles:
@@ -34,7 +34,7 @@ rule intersectFiles:
 
 rule intersectFilesAll:
     input: expand(DATA + 'interim/kaviar_subsets/{subset}/{subset}_sql_result.status.intr', \
-                  subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'))
+                  subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources','no_sources'))
 
 rule intersectDifficultByFile:
     input: vcf=DATA + 'interim/kaviar_subsets/{subset}.vcf',
@@ -44,11 +44,11 @@ rule intersectDifficultByFile:
 
 rule intersectAllDifficultByFile:
     input: expand(DATA + 'interim/kaviar_subsets/{subset}/{subset}_{subset4}.intr', \
-                  subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources'), \
+                  subset=('cgi_only_sources','illumina_only_sources_filtered','cgi_illumina_sources','no_sources'), \
                   subset4=('FunctionalTechnicallyDifficultRegions__BadPromoters_gb-2013-14-5-r51-s1.sql_result.status.difficult','GCcontent__human_g1k_v37_l100_gclt25orgt65_slop50.sql_result.status.difficult','LowComplexity__AllRepeats_gt95percidentity_slop5.sql_result.status.difficult','mappability__lowmappabilityall.sql_result.status.difficult','SegmentalDuplications__segdupall.sql_result.status.difficult'))
 
 rule sortAlleleFrequency:
-    input:  expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources','cgi_illumina_sources','illumina_only_sources_filtered'))
+    input:  expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources','cgi_illumina_sources','illumina_only_sources_filtered','no_sources'))
     output: DATA + 'interim/Kaviar_subset_allele_frq_complete.csv'
     run:
         for afile in input:

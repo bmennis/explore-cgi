@@ -16,7 +16,7 @@ gsOutfile = outdir + 'good_sources.vcf'
 cgiOutfile = outdir + 'cgi_only_sources.vcf'
 illuminaOutfile = outdir + 'illumina_only_sources.vcf'
 cgiIlluminaOutfile = outdir + 'cgi_illumina_sources.vcf'
-
+noSourceOutfile = outdir + 'no_sources.vcf'
 
 with open(infile, 'r') as fh:  #open the vcf file in read mode specified
 
@@ -29,6 +29,7 @@ with open(infile, 'r') as fh:  #open the vcf file in read mode specified
             writeInfo(cgiOutfile)
             writeInfo(illuminaOutfile)
             writeInfo(gsOutfile)
+            writeInfo(noSourceOutfile)
 
         else:
             info = row[7].split(';')  #split the info section of vcf file by semicolon to read data source
@@ -41,7 +42,7 @@ with open(infile, 'r') as fh:  #open the vcf file in read mode specified
 
                     cgi_ls = [x for x in sources if x[0:2] in ('NA','GS') or 'Wellderly' in x or x in ('ISB_founders-Nge3','Inova_CGI_founders-Nge3')]
 
-                    ill_ls = [x for x in sources if not x[0:2] in ('NA','GS') and not 'Wellderly' in x and not x in ('ISB_founders-Nge3','Inova_Illumina_founders-Nge3')]
+                    ill_ls = [x for x in sources if not x[0:2] in ('NA','GS') and not 'Wellderly' in x and not x in ('ISB_founders-Nge3','Inova_CGI_founders-Nge3')]
 
                     #write the read data to corresponding vcf file calling the writeInfo function
 
@@ -57,10 +58,10 @@ with open(infile, 'r') as fh:  #open the vcf file in read mode specified
                         writeInfo(illuminaOutfile)
 
 
-                    else:
+                    elif goodSources:
                         writeInfo(gsOutfile)
 
 
                 else:
-                    pass
+                    writeInfo(noSourceOutfile)
 
