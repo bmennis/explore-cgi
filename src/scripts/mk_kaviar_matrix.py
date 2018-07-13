@@ -40,15 +40,39 @@ def mk_var_type(line):
         return 'subs'
     return 'indel'
 
+def mk_ahmad_status(line):
+    row = line.strip().split('\t')
+    if 'ahmad' in row[7]:
+        ahmad_status = list(set(row[7].split('ahmad_region=')[1].split(';')[0].split(',')))
+        if len(ahmad_status) > 1:
+            return ['-1']
+
+        ahmad_status = ahmad_status[0]
+        if ahmad_status == 'good':
+            return ['1']
+        elif ahmad_status == 'poor':
+            return ['0']
+        else:
+            print(ahmad_status)
+            i = 1/0
+    return ['-1']
+
+def mk_af(line):
+    row = line.strip().split('\t')
+    af = row[7].split('AF=')[1].split(';')[0]
+    return af
+
 def main(args):
     with open(args.vcfFile) as f, open(args.outFile, 'w') as fout:
-        header = ['kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS
+        header = ['af', 'kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS + ['ahmad_status']
         print('\t'.join(header), file=fout)
         for line in f:
             if line[0] != '#':
                 kaviar_status = get_kaviar_status(line)
+                ahmad_status = mk_ahmad_status(line)
                 var_type = mk_var_type(line)
-                ls = [kaviar_status, var_type] + mk_line_info(line)
+                af = mk_af(line)
+                ls = [af, kaviar_status, var_type] + mk_line_info(line) + mk_ahmad_status(line)
                 print('\t'.join(ls), file=fout)
 
 if __name__ == "__main__":
