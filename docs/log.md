@@ -1,6 +1,16 @@
+### 2018_07_13
+* no good feature combo splits cgi only from cgi and illumina
+* ahmad's good/poor regions would work well, but there are not enough cgi only variants in the poor regions
+* going to try deep learning: https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/bty222/4962494
+* limiting af helps. af > 2^-13 gives 1800 negs, and 73% accuracy. ahmad's region is necessary for the boost, so we are seeing the results of a lack of illumina coverage.
+* af > 2^-14 gives 3500 negs (inside ahmad's regions) and at 76% accuracy
+* so cgi only at low and high af behave diferently
+* need to check low freq variants. how many are there af < 2**-14? 30K cgi only and 8.5K both. Accuracy is now 80%.
+* but putting low and high together results in an accuracy of .5? No that accuracy is .88, so something was off in the prior runs.
+
 ### 2018_07_12
 * short runs for kaviar matrix. I see no subs, which worries me.
-* probably want to limit by position
+* probably want to limit by position. Yes many variants are tied to the same position.
 
 ### 2018_07_11
 * Kaviar has updated the sources so variants that had no source now have illumina or cgi sources. Will ignore for now. Ex chr1:877827
