@@ -72,7 +72,7 @@ def main(args):
                 ahmad_status = mk_ahmad_status(line)
                 var_type = mk_var_type(line)
                 af = mk_af(line)
-                ls = [af, kaviar_status, var_type] + mk_line_info(line) + mk_ahmad_status(line)
+                ls = [af, kaviar_status, var_type] + mk_line_info(line) + ahmad_status
                 print('\t'.join(ls), file=fout)
 
 if __name__ == "__main__":
