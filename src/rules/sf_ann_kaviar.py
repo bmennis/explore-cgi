@@ -54,13 +54,13 @@ rule mk_kaviar_bed:
         features = [x for x in dat.columns if not x in ('kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt')]
         dat = dat.drop_duplicates(subset=['chrom', 'pos'])
         dat_ahmad = dat[((dat['ahmad_status'] == 1) | (dat['ahmad_status'] == 0)) ]
-        dat_ahmad.loc[:, 'pos_minus'] = dat_ahmad['pos'] - 150
-        dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 150
+        dat_ahmad.loc[:, 'pos_minus'] = dat_ahmad['pos'] - 300
+        dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 300
         cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
         both_len = len(dat_ahmad[dat_ahmad.kaviar_status=='both'])
         size = min((cgi_len, both_len))
-        dat_ahmad[dat_ahmad.kaviar_status=='cgi'].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
-        dat_ahmad[dat_ahmad.kaviar_status=='both'].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
+        dat_ahmad[(dat_ahmad.kaviar_status=='cgi') & (dat_ahmad.pos_minus>1)].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
+        dat_ahmad[(dat_ahmad.kaviar_status=='both') & (dat_ahmad.pos_minus>1)].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
 
 rule mk_kaviar_fasta:
     input:  bed = DATA + 'interim/kaviar_bed/{chr}.{set}.bed',
@@ -77,10 +77,15 @@ rule upper_fa:
                 if line[0] == '>':
                     print(line.strip(), file=fout)
                 else:
-                    print(line.upper().strip(), file=fout)
+                    upper_nucs = line.upper().strip()
+                    print(upper_nucs, file=fout)
+                    pur_py = lambda x: 'Y' if x in ('C','T') else 'R'
+                    cg = lambda x: 'S' if x in ('C','G') else 'W'
+                    print(''.join([pur_py(x) for x in upper_nucs]), file=fout)
+                    print(''.join([cg(x) for x in upper_nucs]), file=fout)
 
 rule collapse_kaviar_fasta:
-    input:  expand(DATA + 'interim/kaviar_fa_upper/{chr}.{{aset}}.fa', chr=list(range(1,23)) + ['X', 'Y', 'M'])
+    input:  expand(DATA + 'interim/kaviar_fa_upper/{chr}.{{aset}}.fa', chr=list(range(1,23)) + ['X', 'Y',])
     output: DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz'
     shell:  'cat {input} | gzip - > {output}'
 

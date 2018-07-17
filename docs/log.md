@@ -1,3 +1,6 @@
+### 2018_07_17
+* tried pysster w/ nuc alphabet, 150 nuc window, and 20 as kernel length. got 73% accuracy
+
 ### 2018_07_13
 * no good feature combo splits cgi only from cgi and illumina
 * ahmad's good/poor regions would work well, but there are not enough cgi only variants in the poor regions
