@@ -45,6 +45,48 @@ rule parse_kaviar_anno:
     output: DATA + 'interim/kaviar_anno_parsed/{chr}.{set}.mat'
     shell:  'python {SCRIPTS}mk_kaviar_matrix.py {input} {output}'
 
+rule mk_kaviar_bed:
+    input:  i = DATA + 'interim/kaviar_anno_parsed/{chr}.{set}.mat'
+    output: cgi = DATA + 'interim/kaviar_bed/{chr}.{set}.cgi.bed',
+            both = DATA + 'interim/kaviar_bed/{chr}.{set}.both.bed',
+    run:
+        dat = pd.read_csv(input.i, sep='\t')
+        features = [x for x in dat.columns if not x in ('kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt')]
+        dat = dat.drop_duplicates(subset=['chrom', 'pos'])
+        dat_ahmad = dat[((dat['ahmad_status'] == 1) | (dat['ahmad_status'] == 0)) ]
+        dat_ahmad.loc[:, 'pos_minus'] = dat_ahmad['pos'] - 150
+        dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 150
+        cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
+        both_len = len(dat_ahmad[dat_ahmad.kaviar_status=='both'])
+        size = min((cgi_len, both_len))
+        dat_ahmad[dat_ahmad.kaviar_status=='cgi'].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
+        dat_ahmad[dat_ahmad.kaviar_status=='both'].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
+
+rule mk_kaviar_fasta:
+    input:  bed = DATA + 'interim/kaviar_bed/{chr}.{set}.bed',
+            fa = HG19_FA_NOCHR
+    output: DATA + 'interim/kaviar_fa/{chr}.{set}.fa'
+    shell:  'bedtools getfasta -fi {input.fa} -bed {input.bed} > {output}'
+
+rule upper_fa:
+    input:  i = DATA + 'interim/kaviar_fa/{aset}.fa'
+    output: o = DATA + 'interim/kaviar_fa_upper/{aset}.fa'
+    run:
+        with open(input.i) as f, open(output.o, 'w') as fout:
+            for line in f:
+                if line[0] == '>':
+                    print(line.strip(), file=fout)
+                else:
+                    print(line.upper().strip(), file=fout)
+
+rule collapse_kaviar_fasta:
+    input:  expand(DATA + 'interim/kaviar_fa_upper/{chr}.{{aset}}.fa', chr=list(range(1,23)) + ['X', 'Y', 'M'])
+    output: DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz'
+    shell:  'cat {input} | gzip - > {output}'
+
+rule all_kaviar_fa:
+    input: expand(DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz', aset=('short.both', 'short.cgi'))
+
 rule mk_short_kaviars:
     input:  expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y', 'M'])
     output: o = DATA + 'interim/kaviar.mat'
