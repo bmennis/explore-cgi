@@ -53,7 +53,8 @@ rule mk_kaviar_bed:
         dat = pd.read_csv(input.i, sep='\t')
         features = [x for x in dat.columns if not x in ('kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt')]
         dat = dat.drop_duplicates(subset=['chrom', 'pos'])
-        dat_ahmad = dat[((dat['ahmad_status'] == 1) | (dat['ahmad_status'] == 0)) ]
+        #dat_ahmad = dat[((dat['ahmad_status'] == 1) | (dat['ahmad_status'] == 0)) ]
+        dat_ahmad = dat[dat['ahmad_status'] == 1]
         dat_ahmad.loc[:, 'pos_minus'] = dat_ahmad['pos'] - 300
         dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 300
         cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
@@ -79,10 +80,10 @@ rule upper_fa:
                 else:
                     upper_nucs = line.upper().strip()
                     print(upper_nucs, file=fout)
-                    pur_py = lambda x: 'Y' if x in ('C','T') else 'R'
-                    cg = lambda x: 'S' if x in ('C','G') else 'W'
-                    print(''.join([pur_py(x) for x in upper_nucs]), file=fout)
-                    print(''.join([cg(x) for x in upper_nucs]), file=fout)
+                    #pur_py = lambda x: 'Y' if x in ('C','T') else 'R'
+                    #cg = lambda x: 'S' if x in ('C','G') else 'W'
+                    #print(''.join([pur_py(x) for x in upper_nucs]), file=fout)
+                    #print(''.join([cg(x) for x in upper_nucs]), file=fout)
 
 rule collapse_kaviar_fasta:
     input:  expand(DATA + 'interim/kaviar_fa_upper/{chr}.{{aset}}.fa', chr=list(range(1,23)) + ['X', 'Y',])

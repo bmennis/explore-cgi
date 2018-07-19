@@ -1,5 +1,13 @@
+### 2018_07_19
+* pysster is slowing down
+* trying pysster run to max pr during grid search and focus on only positions w/ good ahmad coverage
+
+### 2018_07_18
+* tried pysster w/ nuc alphabet, pyrimidine vs purine, and cg vs at, and 300 nuc window, and 100 kernels. got 73% accuracy. Ran 14 hrs.
+* Can request 4 gpus. Trying to maximize precision of cgi only for next run. Need repeat features.
+
 ### 2018_07_17
-* tried pysster w/ nuc alphabet, 150 nuc window, and 20 as kernel length. got 73% accuracy
+* tried pysster w/ nuc alphabet, 150 nuc window, and 20 as kernel length. got 73% accuracy. Ran 3 hrs.
 
 ### 2018_07_13
 * no good feature combo splits cgi only from cgi and illumina
@@ -41,7 +49,6 @@
 ### 2018_06_26
 * Added Target filtering and sorting rules to sf_ann_target.py to filter illumina matches and mismatches as well as sort them to different files.
 * Work on updating Kaviar annotation pipeline to include filtering illumina data source variant notation.  This notation causes issues with bedtools intersections and working on recreating the command to accurately and efficiently find and replace that notation.
-
 
 ### 2018_06_22
 * Used vcf sort allele script to pull source information for allele frequencies and allele frequencies of each read from each source vcf file.
