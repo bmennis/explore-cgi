@@ -37,6 +37,11 @@ rule prep_exomizer:
     output: GEMINI_DIR + 'ahmad_exomizer.bed.gz'
     shell:  'cut -f 1-3,18,19 {input} | bgzip > {output}'
 
+rule prep_blacklist_genome:
+    input: '/home/ennisb/me/blacklist_genome/{bed}.bed'
+    output: GEMINI_DIR + '{bed,1kg|20120824_combined_mask|blackTerry|dgv|dgv.short|GRCh37GenomicSuperDup.sorted|hg19.blacklist|rmsk|simpleRepeat}.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
 rule tabix_regions:
     """Index any bed file"""
     input:  GEMINI_DIR + '{bedfile}.bed.gz'

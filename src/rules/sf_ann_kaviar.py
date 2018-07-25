@@ -49,6 +49,8 @@ rule mk_kaviar_bed:
     input:  i = DATA + 'interim/kaviar_anno_parsed/{chr}.{set}.mat'
     output: cgi = DATA + 'interim/kaviar_bed/{chr}.{set}.cgi.bed',
             both = DATA + 'interim/kaviar_bed/{chr}.{set}.both.bed',
+            cgi_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.cgi.mat',
+            both_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.both.mat'
     run:
         dat = pd.read_csv(input.i, sep='\t')
         features = [x for x in dat.columns if not x in ('kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt')]
@@ -58,10 +60,15 @@ rule mk_kaviar_bed:
         dat_ahmad.loc[:, 'pos_minus'] = dat_ahmad['pos'] - 300
         dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 300
         cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
+        cgi_dat = dat_ahmad[dat_ahmad.kaviar_status=='cgi']
         both_len = len(dat_ahmad[dat_ahmad.kaviar_status=='both'])
+        both_dat = dat_ahmad[dat_ahmad.kaviar_status=='both']
         size = min((cgi_len, both_len))
+        cgi_dat.to_csv(output.cgi_mat, index=False, header=True, sep='\t')
+        both_dat.to_csv(output.both_mat, index=False, header=True, sep='\t')
         dat_ahmad[(dat_ahmad.kaviar_status=='cgi') & (dat_ahmad.pos_minus>1)].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
         dat_ahmad[(dat_ahmad.kaviar_status=='both') & (dat_ahmad.pos_minus>1)].sample(size)[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
+        
 
 rule mk_kaviar_fasta:
     input:  bed = DATA + 'interim/kaviar_bed/{chr}.{set}.bed',
@@ -90,22 +97,42 @@ rule collapse_kaviar_fasta:
     output: DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz'
     shell:  'cat {input} | gzip - > {output}'
 
+def write_mat(in_file,out_file):
+    with open(list(in_file)[0]) as f:
+        header = f.readline().strip()
+    with open(out_file, 'w') as fout:
+        print(header, file=fout)
+        for i in in_file:
+            with open(i) as f:
+                f.readline()
+                for line in f:
+                    print(line.strip(), file=fout)
+    return out_file
+
 rule all_kaviar_fa:
     input: expand(DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz', aset=('short.both', 'short.cgi'))
 
 rule mk_short_kaviars:
-    input:  expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y', 'M'])
-    output: o = DATA + 'interim/kaviar.mat'
+    input:  s = expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y',]),
+            cgi = expand(DATA + 'interim/kaviar_mat/{chr}.short.cgi.mat', chr=list(range(1,23)) + ['X','Y']),
+            both = expand(DATA + 'interim/kaviar_mat/{chr}.short.both.mat', chr=list(range(1,23)) + ['X','Y'])
+    output: o = DATA + 'interim/kaviar.mat',
+            cgi_out = DATA + 'interim/kaviar_cgi.mat',
+            both_out = DATA + 'interim/kaviar_both.mat'
     run:
-        with open(list(input)[0]) as f:
-            header = f.readline().strip()
-        with open(output.o, 'w') as fout:
-            print(header, file=fout)
-            for i in input:
-                with open(i) as f:
-                    f.readline()
-                    for line in f:
-                        print(line.strip(), file=fout)
+        write_mat(input.s,output.o)
+        write_mat(input.cgi,output.cgi_out)
+        write_mat(input.both,output.both_out)
+
+#        with open(list(input)[0]) as f:
+#            header = f.readline().strip()
+#        with open(output.o, 'w') as fout:
+#            print(header, file=fout)
+#            for i in input:
+#                with open(i) as f:
+#                    f.readline()
+#                    for line in f:
+#                        print(line.strip(), file=fout)
 
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'

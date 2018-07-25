@@ -21,5 +21,6 @@ ANNO_BEDS = ['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegion
              'notinrefseq_union_cds.sort', 'BadPromoters_gb-2013-14-5-r51-s1',
              'human_g1k_v37_l100_gclt30orgt55_slop50', 'human_g1k_v37_l100_gc30to55_slop50','hg19_self_chain_split.sort',
              'hg19_self_chain_split_both', 'notinAllRepeats_gt95percidentity_slop5',
-             'AllRepeats_gt95percidentity_slop5', 'AllRepeats_lt51bp_gt95identity_merged']
+             'AllRepeats_gt95percidentity_slop5', 'AllRepeats_lt51bp_gt95identity_merged',
+             '1kg','20120824_combined_mask','blackTerry','dgv','dgv.short','GRCh37GenomicSuperDup.sorted','hg19.blacklist','rmsk','simpleRepeat']
 HG19_FA_NOCHR = '/mnt/isilon/cbmi/variome/reference/human/hg19/hg19NoChr.fa'
