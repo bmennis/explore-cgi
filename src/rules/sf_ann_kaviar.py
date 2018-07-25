@@ -61,12 +61,12 @@ rule mk_kaviar_bed:
         dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 300
 
         cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
-        both_dat = dat_ahmad[dat_ahmad.kaviar_status=='both']
+        both_len = len(dat_ahmad[dat_ahmad.kaviar_status=='both'])
         size = min((cgi_len, both_len))
 
         cgi_only_dat = dat_ahmad[(dat_ahmad.kaviar_status=='cgi') & (dat_ahmad.pos_minus>1)].sample(size)
         both_dat = dat_ahmad[(dat_ahmad.kaviar_status=='both') & (dat_ahmad.pos_minus>1)].sample(size)
-        cgi_dat.to_csv(output.cgi_mat, index=False, header=True, sep='\t')
+        cgi_only_dat.to_csv(output.cgi_mat, index=False, header=True, sep='\t')
         both_dat.to_csv(output.both_mat, index=False, header=True, sep='\t')
         cgi_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
         both_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
