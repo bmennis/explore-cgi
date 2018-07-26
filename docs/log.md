@@ -1,7 +1,7 @@
 ### 2018_07_26
 * run w/ additional features
 ```
-qsub -l GPU=1 -l h_vmem=50G -l mem_free=50G -e ./perry_err -o ./perry_out pysster_script.sh
+qsub -q gpu.q -l GPU=1 -l h_vmem=50G -l mem_free=50G -e ./perry_err -o ./perry_out pysster_script.sh
 ```
 
 ### 2018_07_19
