@@ -47,12 +47,14 @@ rule parse_kaviar_anno:
 
 rule mk_kaviar_bed:
     input:  i = DATA + 'interim/kaviar_anno_parsed/{chr}.{set}.mat'
-    output: cgi = DATA + 'interim/kaviar_bed/{chr}.{set}.cgi.bed',
-            both = DATA + 'interim/kaviar_bed/{chr}.{set}.both.bed',
-            cgi_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.cgi.mat',
-            both_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.both.mat'
+    output:
+        cgi = DATA + 'interim/kaviar_bed/{chr}.{set}.cgi.{var_type}.bed',
+        both = DATA + 'interim/kaviar_bed/{chr}.{set}.both.{var_type}.bed',
+        cgi_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.cgi.{var_type}.mat',
+        both_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.both.{var_type}.mat'
     run:
         dat = pd.read_csv(input.i, sep='\t')
+        dat = dat[dat.var_type==wildcards.var_type]
         features = [x for x in dat.columns if not x in ('kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt')]
         dat = dat.drop_duplicates(subset=['chrom', 'pos'])
         #dat_ahmad = dat[((dat['ahmad_status'] == 1) | (dat['ahmad_status'] == 0)) ]
@@ -70,7 +72,6 @@ rule mk_kaviar_bed:
         both_dat.to_csv(output.both_mat, index=False, header=True, sep='\t')
         cgi_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
         both_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
-
 
 rule mk_kaviar_fasta:
     input:  bed = DATA + 'interim/kaviar_bed/{chr}.{set}.bed',
@@ -112,7 +113,7 @@ def write_mat(in_file,out_file):
     return out_file
 
 rule all_kaviar_fa:
-    input: expand(DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz', aset=('short.both', 'short.cgi'))
+    input: expand(DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz', aset=('short.both.snv', 'short.cgi.snv', 'full.cgi.indel', 'full.both.indel'))
 
 rule mk_short_kaviars:
     input:  s = expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y',]),
@@ -138,7 +139,7 @@ rule mk_short_kaviars:
 
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'
-    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources','no_sources'))
+    output: expand(DATA + 'interim/kaviar_subsets/{subset}.vcf', subset=('cgi_only_sources', 'illumina_only_sources', 'cgi_illumina_sources', 'no_sources'))
     shell:  'python {SCRIPTS}vcf_sort.py {input} {DATA}interim/kaviar_subsets/'
 
 rule filterIlluminaOnlySources:
