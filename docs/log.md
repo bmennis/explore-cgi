@@ -1,3 +1,9 @@
+### 2018_07_26
+* run w/ additional features
+```
+qsub -q gpu.q -l GPU=1 -l h_vmem=50G -l mem_free=50G -e ./perry_err -o ./perry_out pysster_script.sh
+```
+
 ### 2018_07_19
 * pysster is slowing down
 * trying pysster run to max pr during grid search and focus on only positions w/ good ahmad coverage
