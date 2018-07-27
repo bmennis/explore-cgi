@@ -1,5 +1,6 @@
 ### 2018_07_27
 * need to split indels and snvs
+* why are snvs so hard? see if they fix the indel pattern
 
 ### 2018_07_26
 * run w/ additional features
