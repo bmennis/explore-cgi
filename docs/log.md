@@ -1,3 +1,6 @@
+### 2018_07_27
+* need to split indels and snvs
+
 ### 2018_07_26
 * run w/ additional features
 ```
