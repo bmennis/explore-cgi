@@ -42,6 +42,11 @@ rule prep_blacklist_genome:
     output: GEMINI_DIR + '{bed,1kg|20120824_combined_mask|blackTerry|dgv|dgv.short|GRCh37GenomicSuperDup.sorted|hg19.blacklist|rmsk|simpleRepeat}.bed.gz'
     shell: 'bgzip -c {input} > {output}'
 
+rule prep_alignability:
+    input: DATA + 'interim/alignability/{bed}.bed'
+    output: GEMINI_DIR + '{bed,wgEncodeCrgMapabilityAlign100mer|wgEncodeCrgMapabilityAlign24mer|wgEncodeCrgMapabilityAlign36mer|wgEncodeCrgMapabilityAlign40mer|wgEncodeCrgMapabilityAlign50mer|wgEncodeCrgMapabilityAlign75mer}.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
 rule tabix_regions:
     """Index any bed file"""
     input:  GEMINI_DIR + '{bedfile}.bed.gz'
