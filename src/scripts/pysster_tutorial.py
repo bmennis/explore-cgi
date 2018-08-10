@@ -6,36 +6,43 @@ from pysster.Grid_Search import Grid_Search
 from pysster import utils
 DATA = '/mnt/isilon/cbmi/variome/perry/brian/'
 ###Establish output directory
-output_folder = DATA + "explore_cgi/data/interim/kaviar_pysster_additional_features/"
+output_folder = DATA + "explore_cgi/data/interim/kaviar_pysster_add_feat_indel/"
 if not os.path.isdir(output_folder):
     os.makedirs(output_folder)
 
 
-data = Data([DATA + "explore-cgi/data/interim/kaviar_fa_gz/short.cgi.fa.gz", DATA + "explore-cgi/data/interim/kaviar_fa_gz/short.both.fa.gz"], ("ACGT"))
+data = Data([DATA + "explore-cgi/data/interim/kaviar_fa_gz/full.cgi.indel.fa.gz", DATA + "explore-cgi/data/interim/kaviar_fa_gz/full.both.indel.fa.gz"], ("ACGT"))
 
-add_cgi_features = [DATA + "explore-cgi/data/interim/additional_features/1kg.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/20120824_combined_mask.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/blackTerry.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/dgv.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/dgv.short.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/GRCh37GenomicSuperDup.sorted.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/hg19.blacklist.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/rmsk.cgi.out",
-                    DATA + "explore-cgi/data/interim/additional_features/simpleRepeat.cgi.out",
-                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign100mer.cgi.out",
-                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign24mer.cgi.out",
-                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign36mer.cgi.out",
-                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign40mer.cgi.out",
-                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign50mer.cgi.out",
-                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign75mer.cgi.out",]
+add_cgi_features = [DATA + "explore-cgi/data/interim/additional_features/1kg.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/20120824_combined_mask.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/blackTerry.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/dgv.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/dgv.short.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/GRCh37GenomicSuperDup.sorted.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/hg19.blacklist.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/rmsk.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/additional_features/simpleRepeat.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign100mer.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign24mer.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign36mer.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign40mer.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign50mer.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/alignability/wgEncodeCrgMapabilityAlign75mer.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/excludable/consensusBlacklist.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/excludable/dukeExcludeRegions.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/uniqueness/wgEncodeDukeMapabilityUniqueness20bp.cgi.indel.out",
+                    DATA + "explore-cgi/data/interim/uniqueness/wgEncodeDukeMapabilityUniqueness35bp.cgi.indel.out"]
 
 add_both_features = [x.replace('.cgi.', '.both.') for x in add_cgi_features]
 
+indel_len_feat = [DATA + "explore-cgi/data/interim/additional_features/indel_length.cgi.indel.out",
+                  DATA + "explore-cgi/data/interim/additional_features/indel_length.both.indel.out"]
+
 for x, y in zip(add_cgi_features, add_both_features):
 	features = [x,y]
-	print(features)
 	data.load_additional_data(features, is_categorical=True) 
 	
+data.load_additional_data(indel_len_feat, is_categorical=False)
 
 print(data.get_summary())
 
@@ -72,7 +79,7 @@ logos = model.visualize_all_kernels(activations, data, output_folder)
 Image(output_folder+"motif_kernel_13.png")
 Image(output_folder+"activations_kernel_13.png")
 Image(output_folder+"position_kernel_13.png")
-Image("data/alu.png")
+Image(output_folder+"data/alu.png")
 
 #utils.save_as_meme([logo[0] for logo in logos], output_folder+"motifs_seq.meme")
 #utils.save_as_meme([logo[1] for logo in logos], output_folder+"motifs_struct.meme")

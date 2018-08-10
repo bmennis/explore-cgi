@@ -47,6 +47,16 @@ rule prep_alignability:
     output: GEMINI_DIR + '{bed,wgEncodeCrgMapabilityAlign100mer|wgEncodeCrgMapabilityAlign24mer|wgEncodeCrgMapabilityAlign36mer|wgEncodeCrgMapabilityAlign40mer|wgEncodeCrgMapabilityAlign50mer|wgEncodeCrgMapabilityAlign75mer}.bed.gz'
     shell: 'bgzip -c {input} > {output}'
 
+rule prep_excludable:
+    input: DATA + 'interim/excludable/{bed}.bed'
+    output: GEMINI_DIR + '{bed,consensusBlacklist|dukeExcludeRegions}.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
+rule prep_uniqueness:
+    input: DATA + 'interim/uniqueness/{bed}.bed'
+    output: GEMINI_DIR + '{bed,wgEncodeDukeMapabilityUniqueness20bp|wgEncodeDukeMapabilityUniqueness35bp}.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
 rule tabix_regions:
     """Index any bed file"""
     input:  GEMINI_DIR + '{bedfile}.bed.gz'

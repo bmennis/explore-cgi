@@ -117,16 +117,21 @@ rule all_kaviar_fa:
 
 rule mk_short_kaviars:
     input:  s = expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y',]),
-            cgi = expand(DATA + 'interim/kaviar_mat/{chr}.short.cgi.mat', chr=list(range(1,23)) + ['X','Y']),
-            both = expand(DATA + 'interim/kaviar_mat/{chr}.short.both.mat', chr=list(range(1,23)) + ['X','Y'])
+            cgi_indel = expand(DATA + 'interim/kaviar_mat/{chr}.short.cgi.indel.mat', chr=list(range(1,23)) + ['X','Y']),
+            both_indel = expand(DATA + 'interim/kaviar_mat/{chr}.short.both.indel.mat', chr=list(range(1,23)) + ['X','Y']),
+            cgi_snv = expand(DATA + 'interim/kaviar_mat/{chr}.short.cgi.snv.mat', chr=list(range(1,23)) + ['X','Y']),
+            both_snv = expand(DATA + 'interim/kaviar_mat/{chr}.short.both.snv.mat', chr=list(range(1,23)) + ['X','Y'])
     output: o = DATA + 'interim/kaviar.mat',
-            cgi_out = DATA + 'interim/kaviar_cgi.mat',
-            both_out = DATA + 'interim/kaviar_both.mat'
+            cgi_indel_out = DATA + 'interim/kaviar_cgi_indel.mat',
+            both_indel_out = DATA + 'interim/kaviar_both_indel.mat',
+            cgi_snv_out = DATA + 'interim/kaviar_cgi_snv.mat',
+            both_snv_out = DATA + 'interim/kaviar_both_snv.mat'
     run:
         write_mat(input.s,output.o)
-        write_mat(input.cgi,output.cgi_out)
-        write_mat(input.both,output.both_out)
-
+        write_mat(input.cgi_indel,output.cgi_indel_out)
+        write_mat(input.both_indel,output.both_indel_out)
+        write_mat(input.cgi_snv,output.cgi_snv_out)
+        write_mat(input.both_snv,output.both_snv_out)
 #        with open(list(input)[0]) as f:
 #            header = f.readline().strip()
 #        with open(output.o, 'w') as fout:

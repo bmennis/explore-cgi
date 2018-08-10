@@ -62,9 +62,14 @@ def mk_af(line):
     af = row[7].split('AF=')[1].split(';')[0]
     return af
 
+def mk_indel_length(line):
+    ref, alt = line.split('\t')[3:5]
+    ind_len = str(len(alt) - len(ref))
+    return [ind_len]
+
 def main(args):
     with open(args.vcfFile) as f, open(args.outFile, 'w') as fout:
-        header = ['af', 'kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS + ['ahmad_status']
+        header = ['af', 'kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS + ['ahmad_status', 'indel_length']
         print('\t'.join(header), file=fout)
         for line in f:
             if line[0] != '#':
@@ -72,7 +77,8 @@ def main(args):
                 ahmad_status = mk_ahmad_status(line)
                 var_type = mk_var_type(line)
                 af = mk_af(line)
-                ls = [af, kaviar_status, var_type] + mk_line_info(line) + ahmad_status
+                ind_len = mk_indel_length(line)
+                ls = [af, kaviar_status, var_type] + mk_line_info(line) + ahmad_status + ind_len
                 print('\t'.join(ls), file=fout)
 
 if __name__ == "__main__":
