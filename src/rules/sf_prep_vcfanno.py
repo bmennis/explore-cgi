@@ -29,7 +29,7 @@ rule prep_gc_content:
 
 rule prep_low_complexity:
     input: REGION_DIR + 'LowComplexity/{bed}.bed.gz'
-    output: GEMINI_DIR + '{bed,AllRepeats_gt95percidentity_slop5|notinAllRepeats_gt95percidentity_slop5|AllRepeats_lt51bp_gt95identity_merged}.bed.gz'
+    output: GEMINI_DIR + '{bed,AllRepeats_gt95percidentity_slop5|notinAllRepeats_gt95percidentity_slop5|AllRepeats_lt51bp_gt95identity_merged|SimpleRepeat_homopolymer_6to10|SimpleRepeat_homopolymer_gt10|SimpleRepeat_imperfecthomopolgt10_slop5}.bed.gz'
     shell: 'cp {input} {output}'
 
 rule prep_exomizer:

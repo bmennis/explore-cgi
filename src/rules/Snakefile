@@ -3,4 +3,4 @@ include: "sf_prep_vcfanno.py"
 include: "sf_ann_target.py"
 include: "sf_ann_kaviar.py"
 include: "sf_plots.py"
-
+include: "sf_ann_kaviar_cgi_indels.py"

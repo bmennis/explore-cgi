@@ -25,5 +25,6 @@ ANNO_BEDS = ['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegion
              '1kg','20120824_combined_mask','blackTerry','dgv','dgv.short','GRCh37GenomicSuperDup.sorted','hg19.blacklist','rmsk','simpleRepeat',
              'wgEncodeCrgMapabilityAlign100mer','wgEncodeCrgMapabilityAlign24mer','wgEncodeCrgMapabilityAlign36mer',
              'wgEncodeCrgMapabilityAlign40mer','wgEncodeCrgMapabilityAlign50mer','wgEncodeCrgMapabilityAlign75mer',
-             'consensusBlacklist','dukeExcludeRegions','wgEncodeDukeMapabilityUniqueness20bp','wgEncodeDukeMapabilityUniqueness35bp']
+             'consensusBlacklist','dukeExcludeRegions','wgEncodeDukeMapabilityUniqueness20bp','wgEncodeDukeMapabilityUniqueness35bp',
+             'SimpleRepeat_homopolymer_6to10', 'SimpleRepeat_homopolymer_gt10', 'SimpleRepeat_imperfecthomopolgt10_slop5']
 HG19_FA_NOCHR = '/mnt/isilon/cbmi/variome/reference/human/hg19/hg19NoChr.fa'

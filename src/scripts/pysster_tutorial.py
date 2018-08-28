@@ -40,6 +40,7 @@ indel_len_feat = [DATA + "explore-cgi/data/interim/additional_features/indel_len
 
 for x, y in zip(add_cgi_features, add_both_features):
 	features = [x,y]
+	print(features)
 	data.load_additional_data(features, is_categorical=True) 
 	
 data.load_additional_data(indel_len_feat, is_categorical=False)

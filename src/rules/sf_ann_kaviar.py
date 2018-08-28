@@ -50,6 +50,7 @@ rule mk_kaviar_bed:
     output:
         cgi = DATA + 'interim/kaviar_bed/{chr}.{set}.cgi.{var_type}.bed',
         both = DATA + 'interim/kaviar_bed/{chr}.{set}.both.{var_type}.bed',
+        ill = DATA + 'interim/kaviar_bed/{chr}.{set}.ill.{var_type}.bed',
         cgi_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.cgi.{var_type}.mat',
         both_mat = DATA + 'interim/kaviar_mat/{chr}.{set}.both.{var_type}.mat'
     run:
@@ -62,16 +63,18 @@ rule mk_kaviar_bed:
         dat_ahmad.loc[:, 'pos_minus'] = dat_ahmad['pos'] - 300
         dat_ahmad.loc[:, 'pos_plus'] = dat_ahmad['pos'] + 300
 
-        cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
-        both_len = len(dat_ahmad[dat_ahmad.kaviar_status=='both'])
-        size = min((cgi_len, both_len))
+        #cgi_len = len(dat_ahmad[dat_ahmad.kaviar_status=='cgi'])
+        #both_len = len(dat_ahmad[dat_ahmad.kaviar_status=='both'])
+        #size = min((cgi_len, both_len))
 
-        cgi_only_dat = dat_ahmad[(dat_ahmad.kaviar_status=='cgi') & (dat_ahmad.pos_minus>1)].sample(size)
-        both_dat = dat_ahmad[(dat_ahmad.kaviar_status=='both') & (dat_ahmad.pos_minus>1)].sample(size)
+        cgi_only_dat = dat_ahmad[(dat_ahmad.kaviar_status=='cgi') & (dat_ahmad.pos_minus>1)]
+        both_dat = dat_ahmad[(dat_ahmad.kaviar_status=='both') & (dat_ahmad.pos_minus>1)]
+        ill_only_dat = dat_ahmad[(dat_ahmad.kaviar_status=='ill') & (dat_ahmad.pos_minus>1)]
         cgi_only_dat.to_csv(output.cgi_mat, index=False, header=True, sep='\t')
         both_dat.to_csv(output.both_mat, index=False, header=True, sep='\t')
         cgi_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
         both_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
+        ill_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.ill, index=False, header=False, sep='\t')
 
 rule mk_kaviar_fasta:
     input:  bed = DATA + 'interim/kaviar_bed/{chr}.{set}.bed',
@@ -113,21 +116,24 @@ def write_mat(in_file,out_file):
     return out_file
 
 rule all_kaviar_fa:
-    input: expand(DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz', aset=('short.both.snv', 'short.cgi.snv', 'full.cgi.indel', 'full.both.indel'))
+    input: expand(DATA + 'interim/kaviar_fa_gz/{aset}.fa.gz', aset=('short.both.snv', 'short.cgi.snv', 'full.cgi.indel', 'full.both.indel', 'short.cgi.indel', 'short.both.indel'))
 
 rule mk_short_kaviars:
     input:  s = expand(DATA + 'interim/kaviar_anno_parsed/{chr}.short.mat', chr=list(range(1,23)) + ['X', 'Y',]),
-            cgi_indel = expand(DATA + 'interim/kaviar_mat/{chr}.short.cgi.indel.mat', chr=list(range(1,23)) + ['X','Y']),
-            both_indel = expand(DATA + 'interim/kaviar_mat/{chr}.short.both.indel.mat', chr=list(range(1,23)) + ['X','Y']),
-            cgi_snv = expand(DATA + 'interim/kaviar_mat/{chr}.short.cgi.snv.mat', chr=list(range(1,23)) + ['X','Y']),
-            both_snv = expand(DATA + 'interim/kaviar_mat/{chr}.short.both.snv.mat', chr=list(range(1,23)) + ['X','Y'])
+            f = expand(DATA + 'interim/kaviar_anno_parsed/{chr}.full.mat', chr=list(range(1,23)) + ['X','Y']),
+            cgi_indel = expand(DATA + 'interim/kaviar_mat/{chr}.full.cgi.indel.mat', chr=list(range(1,23)) + ['X','Y']),
+            both_indel = expand(DATA + 'interim/kaviar_mat/{chr}.full.both.indel.mat', chr=list(range(1,23)) + ['X','Y']),
+            cgi_snv = expand(DATA + 'interim/kaviar_mat/{chr}.full.cgi.snv.mat', chr=list(range(1,23)) + ['X','Y']),
+            both_snv = expand(DATA + 'interim/kaviar_mat/{chr}.full.both.snv.mat', chr=list(range(1,23)) + ['X','Y'])
     output: o = DATA + 'interim/kaviar.mat',
+            o_f = DATA + 'interim/kaviar_full.mat',
             cgi_indel_out = DATA + 'interim/kaviar_cgi_indel.mat',
             both_indel_out = DATA + 'interim/kaviar_both_indel.mat',
             cgi_snv_out = DATA + 'interim/kaviar_cgi_snv.mat',
             both_snv_out = DATA + 'interim/kaviar_both_snv.mat'
     run:
         write_mat(input.s,output.o)
+        write_mat(input.f,output.o_f)
         write_mat(input.cgi_indel,output.cgi_indel_out)
         write_mat(input.both_indel,output.both_indel_out)
         write_mat(input.cgi_snv,output.cgi_snv_out)
@@ -141,6 +147,33 @@ rule mk_short_kaviars:
 #                    f.readline()
 #                    for line in f:
 #                        print(line.strip(), file=fout)
+
+rule sort_beds:
+    input: DATA + 'interim/kaviar_bed/{chr}.{aset}.bed'
+    output: DATA + 'interim/kaviar_bed_sorted/{chr}.{aset}.sort.bed'
+    shell: 'sortBed -i {input} > {output}'
+
+rule mk_closest_beds:
+    input: a = DATA + 'interim/kaviar_bed_sorted/{chr}.{set}.cgi.{var_type}.sort.bed',
+           b = DATA + 'interim/kaviar_bed_sorted/{chr}.{set}.{type}.{var_type}.sort.bed'
+    output: DATA + 'interim/kaviar_bed_closest/{chr}.{set}.{type}.{var_type}.cgi.closest.bed'
+    shell: 'bedtools closest -a {input.a} -b {input.b} -d  > {output}'
+
+rule cat_closest_beds:
+    input: expand(DATA + 'interim/kaviar_bed_closest/{chr}.{{set}}.cgi.closest.bed', chr=list(range(1,23)) + ['X', 'Y',])
+    output: DATA + 'interim/kaviar_bed_closest_cat/{set}.cgi.closest.bed'
+    shell: 'cat {input} > {output}'
+
+rule all_closest_beds:
+    input: expand(DATA + 'interim/kaviar_bed_closest_cat/{set}.cgi.closest.bed', set=('full.ill.indel', 'full.both.indel'))
+
+rule filter_closest_beds:
+    input: DATA + 'interim/kaviar_bed_closest_cat/{set}.cgi.closest.bed'
+    output: DATA + 'interim/kaviar_bed_closest_filtered/{set}.cgi.{bp}.closest.out'
+    shell: '''awk '{{if ($7 <= {wildcards.bp}) print $0;}}' {input} > {output}'''
+
+rule all_filter_beds:
+    input: expand(DATA + 'interim/kaviar_bed_closest_filtered/{set}.cgi.{bp}.closest.out', set=('full.ill.indel', 'full.both.indel'), bp=(2, 10))
 
 rule split_kaviar:
     input:  DATA + 'interim/kaviar.vcf'
