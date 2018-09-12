@@ -57,6 +57,21 @@ rule prep_uniqueness:
     output: GEMINI_DIR + '{bed,wgEncodeDukeMapabilityUniqueness20bp|wgEncodeDukeMapabilityUniqueness35bp}.bed.gz'
     shell: 'bgzip -c {input} > {output}'
 
+rule prep_gquad:
+    input: DATA + 'interim/gquad_bed/{bed}.bed'
+    output: GEMINI_DIR + '{bed,Na_PDS_plus_hits_intersect|Na_K_plus_hits_intersect|GSE63874_Na_PDS_minus_hits_intersect|GSE63874_Na_K_minus_hits_intersect}.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
+rule prep_add_repeats:
+    input: DATA + 'interim/add_repeat_feat/{bed}.bed'
+    output: GEMINI_DIR + '{bed,interrupted_repeats|microsat|cpg_island_ext}.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
+rule prep_microsat_list:
+    input: GEMINI_DIR + 'hg19.2014.regions.bed'
+    output: GEMINI_DIR + 'hg19.2014.regions.bed.gz'
+    shell: 'bgzip -c {input} > {output}'
+
 rule tabix_regions:
     """Index any bed file"""
     input:  GEMINI_DIR + '{bedfile}.bed.gz'
@@ -75,7 +90,15 @@ names=["ahmad_region","ahmad_region_mq"]
 columns=[4,5]
 ops=["self","self"]
 """
+
+            microsat_entry = """[[annotation]]
+file="hg19.2014.regions.bed.gz"
+names=["microsat_info"]
+columns=[4]
+ops=["self"]
+"""
             print(anno_entry, file=fout)
+            print(microsat_entry, file=fout)
             for afile in input.files:
                 file_name = afile.split('/')[-1].strip('.tbi')
                 name = file_name.split('.bed')[0]

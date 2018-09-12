@@ -1,0 +1,10 @@
+__default__: 
+  h_vmem: 20G
+  mem_free: 20G
+  m_mem_free: 20G
+  threads: 1
+kaviar_vcfanno:
+  h_vmem: 2G
+  mem_free: 2G
+  m_mem_free: 2G
+  threads: 15

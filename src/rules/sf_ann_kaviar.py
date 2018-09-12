@@ -1,4 +1,5 @@
 """Annotations for kaviar."""
+include: "const.py"
 
 rule unzip_kaviar:
     input:  '/mnt/isilon/cbmi/variome/bin/gemini/data/gemini_data/Kaviar-160204-Public-hg19.vt.vcf.gz'
@@ -37,8 +38,11 @@ rule kaviar_vcfanno:
     input:   vcf = DATA + 'interim/kaviar/{chr}.{set}.vcf',
              config = CONFIG + 'kaviar_vcfanno.conf'
     output:  DATA + 'interim/kaviar_anno/{chr}.{set}.vcf'
-    threads: 3
+    threads: 15
     shell:   'vcfanno -p {threads} -base-path {GEMINI_DIR} {input.config} {input.vcf} > {output}'
+
+rule all_kaviar_vcfanno:
+    input: expand(DATA + 'interim/kaviar_anno/{chr}.{set}.vcf', chr=list(range(1,23))+['X','Y'], set=('full','short'))
 
 rule parse_kaviar_anno:
     input:  DATA + 'interim/kaviar_anno/{chr}.{set}.vcf'

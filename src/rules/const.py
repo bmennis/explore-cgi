@@ -26,5 +26,7 @@ ANNO_BEDS = ['lowmappabilityall', 'notinlowmappabilityall', 'siren_similarRegion
              'wgEncodeCrgMapabilityAlign100mer','wgEncodeCrgMapabilityAlign24mer','wgEncodeCrgMapabilityAlign36mer',
              'wgEncodeCrgMapabilityAlign40mer','wgEncodeCrgMapabilityAlign50mer','wgEncodeCrgMapabilityAlign75mer',
              'consensusBlacklist','dukeExcludeRegions','wgEncodeDukeMapabilityUniqueness20bp','wgEncodeDukeMapabilityUniqueness35bp',
-             'SimpleRepeat_homopolymer_6to10', 'SimpleRepeat_homopolymer_gt10', 'SimpleRepeat_imperfecthomopolgt10_slop5']
+             'SimpleRepeat_homopolymer_6to10', 'SimpleRepeat_homopolymer_gt10', 'SimpleRepeat_imperfecthomopolgt10_slop5',
+             'GSE63874_Na_K_minus_hits_intersect','GSE63874_Na_PDS_minus_hits_intersect','Na_K_plus_hits_intersect','Na_PDS_plus_hits_intersect',
+             'hg19.2014.regions','interrupted_repeats','cpg_island_ext','microsat']
 HG19_FA_NOCHR = '/mnt/isilon/cbmi/variome/reference/human/hg19/hg19NoChr.fa'

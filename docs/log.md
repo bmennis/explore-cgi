@@ -1,3 +1,8 @@
+### 2018_08_28
+* ran classifier filtering cgi indels out that are between 0 and 10bp from both or ill indels
+* need to run classifier on full set of indel variants with no filtering
+* need to look into g quadruplex annotation for added feature
+
 ### 2018_07_27
 * need to split indels and snvs
 * why are snvs so hard? see if they fix the indel pattern

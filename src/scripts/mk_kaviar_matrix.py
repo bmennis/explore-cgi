@@ -1,7 +1,9 @@
 """Make matrix from vcf file"""
 import argparse, sys
-sys.path.append('../rules/')
+sys.path.append('/home/ennisb/me/explore-cgi/src/rules/')
 import const
+
+ms_head = ['ms1', 'ms2', 'ms3', 'ms4', 'ms5', 'ms6', 'ms7', 'ms8', 'ms9', 'ms10', 'ms11', 'ms12']
 
 def get_kaviar_status(line):
     row = line.strip().split('\t')
@@ -67,9 +69,21 @@ def mk_indel_length(line):
     ind_len = str(len(alt) - len(ref))
     return [ind_len]
 
+def mk_microsat_info(line):
+    row = line.strip().split('\t')
+    if 'microsat_info' in row[7]:
+        microsat = row[7].split('microsat_info=')[1].split(';')[0]
+        if ',' in microsat:
+            ms_info = microsat.split(',')[0].split('_') 
+        else:
+            ms_info = microsat.strip().split('_')
+    else:
+        ms_info = ['MISS'] * 12
+    return ms_info
+
 def main(args):
     with open(args.vcfFile) as f, open(args.outFile, 'w') as fout:
-        header = ['af', 'kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS + ['ahmad_status', 'indel_length']
+        header = ['af', 'kaviar_status', 'var_type', 'chrom', 'pos', 'ref', 'alt'] + ANNO_BEDS + ['ahmad_status', 'indel_length', 'closest'] + ms_head
         print('\t'.join(header), file=fout)
         for line in f:
             if line[0] != '#':
@@ -78,7 +92,8 @@ def main(args):
                 var_type = mk_var_type(line)
                 af = mk_af(line)
                 ind_len = mk_indel_length(line)
-                ls = [af, kaviar_status, var_type] + mk_line_info(line) + ahmad_status + ind_len
+                ms_info = mk_microsat_info(line)
+                ls = [af, kaviar_status, var_type] + mk_line_info(line) + ahmad_status + ind_len + ['0'] + ms_info
                 print('\t'.join(ls), file=fout)
 
 if __name__ == "__main__":

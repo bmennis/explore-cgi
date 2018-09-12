@@ -1,6 +1,7 @@
 """Annotations for kaviar with cgi only indels greater than 10bp away from illumina only."""
-
+include: 'const.py'
 from collections import defaultdict
+import csv
 
 rule ind_split_kaviar_chrom:
     input:  i = DATA + 'interim/kaviar.vcf'
@@ -71,6 +72,36 @@ rule all_ind_mk_kaviar_bed:
         expand(DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.both.{var_type}.mat', chr=list(range(1,23)) + ['X','Y'], var_type=('indel')),
         expand(DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.ill.{var_type}.mat', chr=list(range(1,23)) + ['X','Y'], var_type=('indel'))
 
+rule ind_mk_kaviar_fasta:
+    input:  bed = DATA + 'interim/cgi_ind_exp/kaviar_bed/{chr}.{set}.bed',
+            fa = HG19_FA_NOCHR
+    output: DATA + 'interim/cgi_ind_exp/kaviar_fa/{chr}.{set}.fa'
+    shell:  'bedtools getfasta -fi {input.fa} -bed {input.bed} > {output}'
+
+rule ind_upper_fa:
+    input:  i = DATA + 'interim/cgi_ind_exp/kaviar_fa/{aset}.fa'
+    output: o = DATA + 'interim/cgi_ind_exp/kaviar_fa_upper/{aset}.fa'
+    run:
+        with open(input.i) as f, open(output.o, 'w') as fout:
+            for line in f:
+                if line[0] == '>':
+                    print(line.strip(), file=fout)
+                else:
+                    upper_nucs = line.upper().strip()
+                    print(upper_nucs, file=fout)
+                    #pur_py = lambda x: 'Y' if x in ('C','T') else 'R'
+                    #cg = lambda x: 'S' if x in ('C','G') else 'W'
+                    #print(''.join([pur_py(x) for x in upper_nucs]), file=fout)
+                    #print(''.join([cg(x) for x in upper_nucs]), file=fout)
+
+rule ind_collapse_kaviar_fasta:
+    input:  expand(DATA + 'interim/cgi_ind_exp/kaviar_fa_upper/{chr}.{{aset}}.fa', chr=list(range(1,23)) + ['X', 'Y',])
+    output: DATA + 'interim/cgi_ind_exp/kaviar_fa_gz/{aset}.fa.gz'
+    shell:  'cat {input} | gzip - > {output}'
+
+rule ind_all_collapse_kav_fa:
+    input: expand(DATA + 'interim/cgi_ind_exp/kaviar_fa_gz/{aset}.fa.gz', aset=('cgi.indel','both.indel'))
+
 def write_mat(in_file,out_file):
     with open(list(in_file)[0]) as f:
         header = f.readline().strip()
@@ -85,17 +116,21 @@ def write_mat(in_file,out_file):
 
 rule ind_mk_kaviars:
     input:  #s = expand(DATA + 'interim/cgi_ind_exp/kaviar_anno_parsed/{chr}.full.mat', chr=list(range(1,23)) + ['X', 'Y',]),
-            cgi_indel = expand(DATA + 'interim/cgi_ind_exp/kaviar_mat_filtered/{chr}.indel.cgi.filtered.mat', chr=list(range(1,23)) + ['X','Y']),
-            both_indel = expand(DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.both.indel.mat', chr=list(range(1,23)) + ['X','Y']),
+            cgi_indel = expand(DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.indel.cgi.filt.flanked.mat', chr=list(range(1,23)) + ['X','Y']),
+            both_indel = expand(DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.indel.both.filt.flanked.mat', chr=list(range(1,23)) + ['X','Y']),
             #cgi_snv = expand(DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.cgi.snv.mat', chr=list(range(1,23)) + ['X','Y']),
             #both_snv = expand(DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.both.snv.mat', chr=list(range(1,23)) + ['X','Y'])
     output: #o = DATA + 'interim/cgi_ind_exp/kaviar.mat',
+            cgi_only_indel_out = DATA + 'interim/cgi_ind_exp/cat_mat/cgi_indel.mat',
+            both_only_indel_out = DATA + 'interim/cgi_ind_exp/cat_mat/both_indel.mat',
             cgi_indel_out = DATA + 'interim/cgi_ind_exp/kaviar_cgi_indel.mat',
             #both_indel_out = DATA + 'interim/cgi_ind_exp/kaviar_both_indel.mat',
             #cgi_snv_out = DATA + 'interim/cgi_ind_exp/kaviar_cgi_snv.mat',
             #both_snv_out = DATA + 'interim/cgi_ind_exp/kaviar_both_snv.mat'
     run:
         #write_mat(input.s,output.o)
+        write_mat(input.cgi_indel, output.cgi_only_indel_out)
+        write_mat(input.both_indel, output.both_only_indel_out)
         write_mat(input.cgi_indel + input.both_indel,output.cgi_indel_out)
         #write_mat(input.both_indel,output.both_indel_out)
         #write_mat(input.cgi_snv,output.cgi_snv_out)
@@ -113,9 +148,10 @@ rule ind_sort_beds:
 
 rule ind_mk_closest_beds:
     input: a = DATA + 'interim/cgi_ind_exp/kaviar_bed_sorted/{chr}.cgi.{var_type}.sort.bed',
-           b = DATA + 'interim/cgi_ind_exp/kaviar_bed_sorted/{chr}.{s_type}.{var_type}.sort.bed'
-    output: DATA + 'interim/cgi_ind_exp/kaviar_bed_closest/{chr}.{s_type}.{var_type}.cgi.closest.bed'
-    shell: 'bedtools closest -a {input.a} -b {input.b} -d  > {output}'
+           b_ill = DATA + 'interim/cgi_ind_exp/kaviar_bed_sorted/{chr}.ill.{var_type}.sort.bed',
+           b_both = DATA + 'interim/cgi_ind_exp/kaviar_bed_sorted/{chr}.both.{var_type}.sort.bed'
+    output: DATA + 'interim/cgi_ind_exp/kaviar_bed_closest/{chr}.{var_type}.cgi.closest.bed'
+    shell: 'bedtools closest -a {input.a} -b {input.b_ill} {input.b_both} -mdb all -d  > {output}'
 
 #rule cat_closest_beds:
 #    input: expand(DATA + 'interim/kaviar_bed_closest/{chr}.{{set}}.cgi.closest.bed', chr=list(range(1,23)) + ['X', 'Y',])
@@ -126,33 +162,77 @@ rule ind_mk_closest_beds:
 #    input: expand(DATA + 'interim/kaviar_bed_closest_cat/{set}.cgi.closest.bed', set=('full.ill.indel', 'full.both.indel'))
 
 rule ind_filter_closest_beds:
-    input: expand(DATA + 'interim/cgi_ind_exp/kaviar_bed_closest/{{chrom}}.{s_type}.{{var_type}}.cgi.closest.bed', s_type=('ill','both'))
-    output: DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_filtered/{chrom}.{var_type}.cgi.closest.filtered.out'
-    shell: '''cat {input} | awk '{{if (($7 == 0) || ($7 >= 10)) print $1 "\t" $2}}' | sort -u > {output}'''
+    input: DATA + 'interim/cgi_ind_exp/kaviar_bed_closest/{chrom}.{var_type}.cgi.closest.bed'
+    output: DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_filtered/{chrom}.{var_type}.cgi.closest.filtered.bed'
+    shell: '''awk '{{if (($8 > 0) && ($8 < 10)) print $1 "\t" $2}}' {input} > {output}'''
+
+#rule removed_ind:
+#    input: expand(DATA + 'interim/cgi_ind_exp/kaviar_bed_closest/{chrom}.{s_type}.{{var_type}}.cgi.closest.bed', s_type=('ill','both'), chrom=list(range(1,23)) + ['X','Y'])
+#    output: DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_removed/{var_type}.cgi.removed.out'
+#    shell: '''cat {input} | awk '{{if (($7 > 0) && ($7 < 10)) print $1 "\t" $2}}' | sort -u > {output}'''
+
+#rule all_removed_ind:
+#    input: expand(DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_removed/{var_type}.cgi.removed.out', var_type=('indel'))
 
 rule indel_dict:
-    input: bed = DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_filtered/{chrom}.{var_type}.cgi.closest.filtered.out',
+    input: bed = DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_filtered/{chrom}.{var_type}.cgi.closest.filtered.bed',
            mat = DATA + 'interim/cgi_ind_exp/kaviar_mat/{chrom}.cgi.indel.mat'
     output: DATA + 'interim/cgi_ind_exp/kaviar_mat_filtered/{chrom}.{var_type}.cgi.filtered.mat'
     run:
         cgi_ind = defaultdict(dict)
-        for chrom in list(range(1,23)) + ['X','Y']:
-            with open(DATA + 'interim/cgi_ind_exp/kaviar_bed_closest_filtered/' + str(wildcards.chrom) + '.' + str(wildcards.var_type) + '.cgi.closest.filtered.out', 'r') as f:
-                for line in f:
-                    pos = line.split('\t')[1]
-                    pos = pos.strip('\n')
-                    cgi_ind[chrom][pos] = True
+        with open(input.bed, 'r') as f:
+            for line in f:
+                pos = line.split('\t')[1]
+                pos = pos.strip('\n')
+                cgi_ind[wildcards.chrom][pos] = True
+        print('100017487' in cgi_ind[wildcards.chrom])
+        with open(input.mat, 'r') as f, open(str(output), 'w') as fout:
+            reader = csv.DictReader(f, delimiter='\t')
+            print('\t'.join(reader.fieldnames), file=fout)
+            for row in reader:
+                new_pos = row['pos']
+                if '100017487' == new_pos:
+                  print('found')
+                #print(new_pos)
+                if new_pos in cgi_ind[wildcards.chrom]:
+                    pass
+                    #row['closest'] = '1'
+                    #print('\t'.join([row[x] for x in reader.fieldnames]), file=fout)
+                else:
+                    print('\t'.join([row[x] for x in reader.fieldnames]),file=fout)
 
-        for chrom in list(range(1,23)) + ['X','Y']:
-            with open(DATA + 'interim/cgi_ind_exp/kaviar_mat/' + str(wildcards.chrom) + '.cgi.indel.mat', 'r') as f, open(str(output), 'w') as o:
-                head = f.readline()
-                o.write(head)
-                for line in f:
-                    new_pos = line.split('\t')[4]
-                    if new_pos in cgi_ind[str(chrom)]:
-                        o.write(line)
-                    else:
-                        pass
+rule tmp:
+  input: DATA + 'interim/cgi_ind_exp/kaviar_mat_filtered/10.indel.cgi.filtered.mat'
 
 rule ind_all_filtered_mat:
     input: expand(DATA + 'interim/cgi_ind_exp/kaviar_mat_filtered/{chrom}.{var_type}.cgi.filtered.mat', chrom=list(range(1,23)) + ['X','Y'], var_type=('indel'))
+
+rule ind_flank_mat:
+    input: fa = DATA + 'interim/cgi_ind_exp/kaviar_fa_upper/{chr}.cgi.{var_type}.fa',
+           mat = DATA + 'interim/cgi_ind_exp/kaviar_mat_filtered/{chr}.{var_type}.cgi.filtered.mat'
+    output: DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.{var_type}.cgi.filt.flanked.mat'
+    shell: 'python {SCRIPTS}mk_flanking_seq.py {input.fa} {input.mat} {output}'
+
+rule ind_flank_both:
+    input: fa = DATA + 'interim/cgi_ind_exp/kaviar_fa_upper/{chr}.both.{var_type}.fa',
+           mat = DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.both.{var_type}.mat'
+    output: DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.{var_type}.both.filt.flanked.mat'
+    shell: 'python {SCRIPTS}mk_flanking_seq.py {input.fa} {input.mat} {output}'
+
+rule ind_mk_add_feat:
+    input: expand(DATA + 'interim/cgi_ind_exp/cat_mat/{type}_indel.mat', type=('cgi','both'))
+    shell: 'python {SCRIPTS}mk_pysster_add_feats.py {input}'
+
+rule ind_mk_filt_beds:
+    input: i = DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.{var_type}.{type}.filt.flanked.mat'
+    output:
+        cgi = DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.cgi.{var_type}.bed',
+        both = DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.both.{var_type}.bed',
+    run:
+        dat = pd.read_csv(input.i, sep='\t')
+        dat_closest = dat[(dat['closest'] == 0) & (dat['pos_minus'] > 1)]
+
+        cgi_only_dat = dat_closest[(dat_closest.kaviar_status=='cgi')]
+        both_dat = dat_closest[(dat_ahmad.kaviar_status=='both')]
+        cgi_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
+        both_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
