@@ -11,11 +11,13 @@ def main(args):
         i_file = str(input_file)
         with open(input_file, 'r') as inf:
             df = pd.read_csv(inf, sep='\t')
-            sp_type = i_file.split('/')[-1].split('_')[0]
+            crit = df.apply(lambda row: row['alt'][0] == row['ref'][0], axis=1)
+            df_new = df[crit] # selects True rows
+            sp_type = i_file.split('/')[-1].split('.')[0]
             of = i_file.split('/')[0:-2] + ['add_feat'] + [sp_type]
             of = '/'.join(of)
             for flag in anno_beds:
-                df1 = df[[flag]]
+                df1 = df_new[[flag]]
                 ofw = of + '__' + flag + '.out'
                 with open(ofw, 'w') as outf:
                     df1.to_csv(outf, index=False, header=False)

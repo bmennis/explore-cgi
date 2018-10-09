@@ -136,6 +136,11 @@ rule ind_mk_kaviars:
         #write_mat(input.cgi_snv,output.cgi_snv_out)
         #write_mat(input.both_snv,output.both_snv_out)
 
+rule mk_sample_mat:
+    input: DATA + 'interim/cgi_ind_exp/cat_mat/{type}_{var_type}.mat'
+    output: DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat'
+    shell: 'python {SCRIPTS}sample_mat.py {input} {output}'
+
 rule mk_pos_beds:
     input: DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.{s_type}.{var_type}.mat'
     output: DATA + 'interim/cgi_ind_exp/kaviar_bed_pos/{chr}.{s_type}.{var_type}.pos.bed'
@@ -220,7 +225,7 @@ rule ind_flank_both:
     shell: 'python {SCRIPTS}mk_flanking_seq.py {input.fa} {input.mat} {output}'
 
 rule ind_mk_add_feat:
-    input: expand(DATA + 'interim/cgi_ind_exp/cat_mat/{type}_indel.mat', type=('cgi','both'))
+    input: expand(DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat', type=('cgi','both'), var_type=('indel'))
     shell: 'python {SCRIPTS}mk_pysster_add_feats.py {input}'
 
 rule ind_mk_filt_beds:
@@ -236,3 +241,19 @@ rule ind_mk_filt_beds:
         both_dat = dat_closest[(dat_ahmad.kaviar_status=='both')]
         cgi_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
         both_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
+
+rule ind_mk_pysster_fa:
+    input: DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat'
+    output: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.fa',
+    shell: 'python {SCRIPTS}mk_pysster_indel_fa.py {input} {output}'
+
+rule ind_all_pysster_fa:
+    input: expand(DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.fa', type=('cgi','both'), var_type=('indel'))
+
+rule ind_collapse_pysster_fa:
+    input: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.fa'
+    output: DATA + 'interim/cgi_ind_exp/pysster_fa_gz/{type}.{var_type}.fa.gz'
+    shell: 'gzip {input} > {output}'
+
+rule ind_all_collapse_fa:
+    input: expand(DATA + 'interim/cgi_ind_exp/pysster_fa_gz/{type}.{var_type}.fa.gz', type=('cgi','both'), var_type=('indel'))

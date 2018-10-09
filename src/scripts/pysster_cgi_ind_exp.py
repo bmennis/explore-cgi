@@ -4,14 +4,14 @@ from IPython.display import Image
 from pysster.Data import Data
 from pysster.Grid_Search import Grid_Search
 from pysster import utils
-DATA = '/mnt/isilon/cbmi/variome/perry/brian/'
+DATA = '/mnt/isilon/dbhi_bfx/perry/brian/'
 ###Establish output directory
-output_folder = DATA + "explore_cgi/data/interim/cgi_ind_exp/pysster_output/"
+output_folder = DATA + "explore_cgi/data/interim/cgi_ind_exp/pysster_output/run_10_9_18_2/"
 if not os.path.isdir(output_folder):
     os.makedirs(output_folder)
 
 
-data = Data([DATA + "explore-cgi/data/interim/cgi_ind_exp/kaviar_fa_gz/cgi.indel.fa.gz", DATA + "explore-cgi/data/interim/cgi_ind_exp/kaviar_fa_gz/both.indel.fa.gz"], ("ACGT"))
+data = Data([DATA + "explore-cgi/data/interim/cgi_ind_exp/pysster_fa/cgi.indel.fa.gz", DATA + "explore-cgi/data/interim/cgi_ind_exp/pysster_fa/both.indel.fa.gz"], ("ACGT","XDI"))
 
 add_cgi_features = [DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__1kg.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__20120824_combined_mask.out",
@@ -40,7 +40,7 @@ add_cgi_features = [DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__1
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__microsat.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__Na_K_plus_hits_intersect.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__Na_PDS_plus_hits_intersect.out",
-                    DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__notinAllRepeats_gt95percidentity_slop5.ou",
+                    DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__notinAllRepeats_gt95percidentity_slop5.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__notinlowmappabilityall.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__notinrefseq_union_cds.sort.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__notinsegdupall.out",
@@ -67,7 +67,6 @@ indel_len_feat = [DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi__ind
 
 for x, y in zip(add_cgi_features, add_both_features):
 	features = [x,y]
-	print(features)
 	data.load_additional_data(features, is_categorical=True) 
 	
 data.load_additional_data(indel_len_feat, is_categorical=False)
@@ -78,7 +77,7 @@ data.train_val_test_split(portion_train=0.6, portion_val=0.2, seed=3)
 print(data.get_summary())
 
 ###Model Training
-params = {"conv_num": [2, 3], "kernel_num": [100], "kernel_len": [20], "dropout_input": [0.1, 0.4]}
+params = {"conv_num": [2, 3], "kernel_num": [100], "kernel_len": [8], "dropout_input": [0.1, 0.4]}
 searcher = Grid_Search(params)
 start = time()
 model, summary = searcher.train(data, pr_auc = True,  verbose=False)
