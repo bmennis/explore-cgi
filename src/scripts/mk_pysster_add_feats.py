@@ -13,7 +13,8 @@ def main(args):
             df = pd.read_csv(inf, sep='\t')
             crit = df.apply(lambda row: row['alt'][0] == row['ref'][0], axis=1)
             df_new = df[crit] # selects True rows
-            sp_type = i_file.split('/')[-1].split('.')[0]
+            sp_type = i_file.split('/')[-1].split('.')[0:-1]
+            sp_type = '.'.join(sp_type)
             of = i_file.split('/')[0:-2] + ['add_feat'] + [sp_type]
             of = '/'.join(of)
             for flag in anno_beds:

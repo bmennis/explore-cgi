@@ -102,6 +102,32 @@ rule ind_collapse_kaviar_fasta:
 rule ind_all_collapse_kav_fa:
     input: expand(DATA + 'interim/cgi_ind_exp/kaviar_fa_gz/{aset}.fa.gz', aset=('cgi.indel','both.indel'))
 
+#rule mk_kaviar_filt_fasta:
+#    input: bed = DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.{aset}.bed',
+#           fa = HG19_FA_NOCHR
+#    output: DATA + 'interim/cgi_ind_exp/kaviar_pysster_fa_ref/{chr}.{aset}.fa'
+#    shell: 'bedtools getfasta -fi {input.fa} -bed {input.bed} > {output}'
+#
+#rule ind_upper_kaviar_filt_fa:
+#    input:  i = DATA + 'interim/cgi_ind_exp/kaviar_pysster_fa_ref/{aset}.fa'
+#    output: o = DATA + 'interim/cgi_ind_exp/kaviar_pysster_fa_ref_upper/{aset}.fa'
+#    run:
+#        with open(input.i) as f, open(output.o, 'w') as fout:
+#            for line in f:
+#                if line[0] == '>':
+#                    print(line.strip(), file=fout)
+#                else:
+#                    upper_nucs = line.upper().strip()
+#                    print(upper_nucs, file=fout)
+#
+#rule ind_collapse_kaviar_filt_fasta:
+#    input:  expand(DATA + 'interim/cgi_ind_exp/kaviar_pysster_fa_ref_upper/{chr}.{{aset}}.fa', chr=list(range(1,23)) + ['X', 'Y',])
+#    output: DATA + 'interim/cgi_ind_exp/kaviar_pysster_fa_ref_gz/{aset}.fa.gz'
+#    shell:  'cat {input} | gzip - > {output}'
+#
+#rule ind_all_collapse_kav_filt_fa:
+#    input: expand(DATA + 'interim/cgi_ind_exp/kaviar_pysster_fa_ref_gz/{aset}.fa.gz', aset=('cgi.indel','both.indel'))
+
 def write_mat(in_file,out_file):
     with open(list(in_file)[0]) as f:
         header = f.readline().strip()
@@ -138,8 +164,10 @@ rule ind_mk_kaviars:
 
 rule mk_sample_mat:
     input: DATA + 'interim/cgi_ind_exp/cat_mat/{type}_{var_type}.mat'
-    output: DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat'
-    shell: 'python {SCRIPTS}sample_mat.py {input} {output}'
+    output: 
+        samp_mat = DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat',
+        unsamp_mat = DATA + 'interim/cgi_ind_exp/pysster_unsamp_mat/{type}.{var_type}.unsample.mat'
+    shell: 'python {SCRIPTS}sample_mat.py {input} {output.samp_mat} {output.unsamp_mat}'
 
 rule mk_pos_beds:
     input: DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.{s_type}.{var_type}.mat'
@@ -224,36 +252,70 @@ rule ind_flank_both:
     output: DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.{var_type}.both.filt.flanked.mat'
     shell: 'python {SCRIPTS}mk_flanking_seq.py {input.fa} {input.mat} {output}'
 
-rule ind_mk_add_feat:
+rule ind_mk_samp_add_feat:
     input: expand(DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat', type=('cgi','both'), var_type=('indel'))
+    shell: 'python {SCRIPTS}mk_pysster_add_feats.py {input}'
+
+rule ind_mk_unsamp_add_feat:
+    input: expand(DATA + 'interim/cgi_ind_exp/pysster_unsamp_mat/{type}.{var_type}.unsample.mat', type=('cgi','both'), var_type=('indel'))
     shell: 'python {SCRIPTS}mk_pysster_add_feats.py {input}'
 
 rule ind_mk_filt_beds:
     input: i = DATA + 'interim/cgi_ind_exp/kaviar_mat_filt_flanked/{chr}.{var_type}.{type}.filt.flanked.mat'
-    output:
-        cgi = DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.cgi.{var_type}.bed',
-        both = DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.both.{var_type}.bed',
+    output: o = DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.{type}.{var_type}.bed'
     run:
         dat = pd.read_csv(input.i, sep='\t')
         dat_closest = dat[(dat['closest'] == 0) & (dat['pos_minus'] > 1)]
+        dat_closest[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.o, index=False, header=False, sep='\t')
 
-        cgi_only_dat = dat_closest[(dat_closest.kaviar_status=='cgi')]
-        both_dat = dat_closest[(dat_ahmad.kaviar_status=='both')]
-        cgi_only_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.cgi, index=False, header=False, sep='\t')
-        both_dat[['chrom', 'pos_minus', 'pos_plus']].to_csv(output.both, index=False, header=False, sep='\t')
+rule ind_mk_all_filt_beds:
+    input: expand(DATA + 'interim/cgi_ind_exp/kaviar_pysster_bed/{chr}.{type}.{var_type}.bed', type=('cgi','both'), chr=list(range(1,23)) + ['X','Y'], var_type=('indel'))
 
-rule ind_mk_pysster_fa:
+rule ind_mk_pysster_sample_fa:
     input: DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat'
-    output: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.fa',
+    output: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.sample.fa'
+    shell: 'python {SCRIPTS}mk_pysster_indel_fa.py {input} {output}'
+
+rule ind_mk_pysster_unsamp_fa:
+    input: DATA + 'interim/cgi_ind_exp/pysster_unsamp_mat/{type}.{var_type}.unsample.mat'
+    output: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.unsample.fa'
     shell: 'python {SCRIPTS}mk_pysster_indel_fa.py {input} {output}'
 
 rule ind_all_pysster_fa:
-    input: expand(DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.fa', type=('cgi','both'), var_type=('indel'))
+    input: expand(DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.{samp_type}.fa', type=('cgi','both'), var_type=('indel'), samp_type=('sample','unsample'))
 
 rule ind_collapse_pysster_fa:
-    input: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.fa'
-    output: DATA + 'interim/cgi_ind_exp/pysster_fa_gz/{type}.{var_type}.fa.gz'
+    input: DATA + 'interim/cgi_ind_exp/pysster_fa/{type}.{var_type}.{samp_type}.fa'
+    output: DATA + 'interim/cgi_ind_exp/pysster_fa_gz/{type}.{var_type}.{samp_type}.fa.gz'
     shell: 'gzip {input} > {output}'
 
 rule ind_all_collapse_fa:
-    input: expand(DATA + 'interim/cgi_ind_exp/pysster_fa_gz/{type}.{var_type}.fa.gz', type=('cgi','both'), var_type=('indel'))
+    input: 
+        fa = expand(DATA + 'interim/cgi_ind_exp/pysster_fa_gz/{type}.{var_type}.{samp_type}.fa.gz', type=('cgi','both'), var_type=('indel'), samp_type=('sample','unsample'))
+
+
+
+rule ind_mk_pysster_sample_ref_fa:
+    input: DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat'
+    output: DATA + 'interim/cgi_ind_exp/pysster_ref_fa/{type}.{var_type}.sample.fa'
+    shell: 'python {SCRIPTS}mk_pysster_indel_ref_fa.py {input} {output}'
+
+rule ind_mk_pysster_unsamp_ref_fa:
+    input: DATA + 'interim/cgi_ind_exp/pysster_unsamp_mat/{type}.{var_type}.unsample.mat'
+    output: DATA + 'interim/cgi_ind_exp/pysster_ref_fa/{type}.{var_type}.unsample.fa'
+    shell: 'python {SCRIPTS}mk_pysster_indel_ref_fa.py {input} {output}'
+
+rule ind_all_pysster_ref_fa:
+    input: expand(DATA + 'interim/cgi_ind_exp/pysster_ref_fa/{type}.{var_type}.{samp_type}.fa', type=('cgi','both'), var_type=('indel'), samp_type=('sample','unsample'))
+
+rule ind_collapse_pysster_ref_fa:
+    input: DATA + 'interim/cgi_ind_exp/pysster_ref_fa/{type}.{var_type}.{samp_type}.fa'
+    output: DATA + 'interim/cgi_ind_exp/pysster_ref_fa_gz/{type}.{var_type}.{samp_type}.fa.gz'
+    shell: 'gzip {input} > {output}'
+
+rule ind_all_collapse_pysster_ref_fa:
+    input:
+        fa = expand(DATA + 'interim/cgi_ind_exp/pysster_ref_fa_gz/{type}.{var_type}.{samp_type}.fa.gz', type=('cgi','both'), var_type=('indel'), samp_type=('sample','unsample'))
+
+
+

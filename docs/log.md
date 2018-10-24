@@ -1,3 +1,11 @@
+### 2018_10_24
+* we recognized that training of the pysster model would need downsampling of the unverified cgi data set to roughly the verified set
+* once the data was downsampled, the pysster model was trained on all additional features to this point and saved
+* ran the pysster model on the unsampled data for validation.
+* to explore the performance on differing features and annotations we ran pysster with no added features, all added features and only reference sequence
+* pysster appears to remove 'useless' (all flagged 0 or 1) features when training a model, beware of errors running saved model for different amounts of features
+* need to investigate the frequency cutoff limit
+
 ### 2018_08_28
 * ran classifier filtering cgi indels out that are between 0 and 10bp from both or ill indels
 * need to run classifier on full set of indel variants with no filtering
