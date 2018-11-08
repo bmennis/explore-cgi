@@ -1,3 +1,10 @@
+### 2018_11_8
+* checked allele frequencies of indels after filtering and vast majority very low frq
+* looking into Target dataset
+* after filtering out duplicates get counts for indels and snvs
+* go back to Kaviar set and get allele frequencies for snvs of cgi only data, want to filter snvs for good ahmad status
+* With both counts look into possibly seeing if we can get a merge of the two data sets and find common reads
+
 ### 2018_10_24
 * we recognized that training of the pysster model would need downsampling of the unverified cgi data set to roughly the verified set
 * once the data was downsampled, the pysster model was trained on all additional features to this point and saved
