@@ -8,8 +8,15 @@ unsampled_mat_file = sys.argv[3]
 
 cols = ['chrom', 'pos', 'ref', 'alt']
 dat = pd.read_csv(kaviar_mat_file, sep='\t')
+dat = dat.loc[abs(dat['indel_length']) < 50]
+
+
 random.seed(900)
-samp_mat = dat.sample(8050)
+samp_mat = dat.sample(8000)
+
+
+#random.seed(900)
+#samp_mat = dat.sample(5000)
 
 m = pd.merge(dat, samp_mat[cols], on=cols, how='left', indicator=True)
 m[m._merge=='left_only'].drop(['_merge'], axis=1).to_csv(unsampled_mat_file, index=False, sep='\t')

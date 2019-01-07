@@ -169,6 +169,11 @@ rule mk_sample_mat:
         unsamp_mat = DATA + 'interim/cgi_ind_exp/pysster_unsamp_mat/{type}.{var_type}.unsample.mat'
     shell: 'python {SCRIPTS}sample_mat.py {input} {output.samp_mat} {output.unsamp_mat}'
 
+rule mk_all_sample_mat:
+    input: 
+        samp_mat = expand(DATA + 'interim/cgi_ind_exp/pysster_samp_mat/{type}.{var_type}.sample.mat', type = ('cgi','both'), var_type = ('indel')),
+        unsamp_mat = expand(DATA + 'interim/cgi_ind_exp/pysster_unsamp_mat/{type}.{var_type}.unsample.mat', type = ('cgi','both'), var_type = ('indel'))
+
 rule mk_pos_beds:
     input: DATA + 'interim/cgi_ind_exp/kaviar_mat/{chr}.{s_type}.{var_type}.mat'
     output: DATA + 'interim/cgi_ind_exp/kaviar_bed_pos/{chr}.{s_type}.{var_type}.pos.bed'

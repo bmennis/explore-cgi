@@ -6,7 +6,7 @@ from pysster.Grid_Search import Grid_Search
 from pysster import utils
 DATA = '/mnt/isilon/dbhi_bfx/perry/brian/'
 ###Establish output directory
-output_folder = DATA + "explore_cgi/data/interim/cgi_ind_exp/pysster_output/train_run_10_18_18_all_add_feats_back/"
+output_folder = DATA + "explore_cgi/data/interim/cgi_ind_exp/pysster_output/train_run_1_4_19_kav_8k_each/"
 if not os.path.isdir(output_folder):
     os.makedirs(output_folder)
 

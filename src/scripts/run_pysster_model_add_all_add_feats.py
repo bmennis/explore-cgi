@@ -4,12 +4,12 @@ from pysster import utils
 from IPython.display import Image
 DATA = "/mnt/isilon/dbhi_bfx/perry/brian/"
 #establish output directory
-output_folder =  DATA + "explore-cgi/data/interim/cgi_ind_exp/pysster_output/model_test_run_10_18_18_all_feats/"
+output_folder =  DATA + "explore-cgi/data/interim/cgi_ind_exp/pysster_output/model_test_run_1_4_19_kav_8k_each_all_feats/"
 if not os.path.isdir(output_folder):
     os.makedirs(output_folder)
 
 #load the pysster prediction model
-model = utils.load_model("/mnt/isilon/dbhi_bfx/perry/brian/explore_cgi/data/interim/cgi_ind_exp/pysster_output/train_run_10_18_18_all_add_feats_back/model.pkl")
+model = utils.load_model("/mnt/isilon/dbhi_bfx/perry/brian/explore_cgi/data/interim/cgi_ind_exp/pysster_output/train_run_1_4_19_kav_8k_each/model.pkl")
 
 add_cgi_features = [DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi.indel.unsample__microsat.out",
                     DATA + "explore-cgi/data/interim/cgi_ind_exp/add_feat/cgi.indel.unsample__lowmappabilityall.out",
